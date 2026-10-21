@@ -12,7 +12,7 @@ src/app/
 ├── features/                # Funkcje gry; każda otrzymuje własne katalogi
 ├── app.config.ts
 ├── app.routes.ts            # Puste miejsce na routing stron
-└── app.ts                   # Główny komponent z router-outlet
+└── app.component.ts         # Główny komponent z router-outlet
 ```
 
 Nowe funkcje dodawaj w `src/app/features/<nazwa>/`, np. `pages/` dla stron, `services/` dla logiki funkcji oraz `data-access/` dla komunikacji z API. Wspólny kod aplikacji umieszczaj w `src/app/core/`.
