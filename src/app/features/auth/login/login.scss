@@ -1,0 +1,162 @@
+.login-form {
+    display: grid;
+    gap: 18px;
+    color: var(--color-text, #f7f3ff);
+}
+
+.form-field {
+    display: grid;
+    gap: 8px;
+}
+
+.form-field label {
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.form-field input {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 13px;
+    border: 1px solid var(--color-border, #393249);
+    border-radius: 9px;
+    outline: none;
+    color: var(--color-text, #f7f3ff);
+    background: var(--color-background, #100e1a);
+    font: inherit;
+    font-size: 14px;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.form-field input::placeholder {
+    color: var(--color-muted, #aaa3ba);
+    opacity: 0.75;
+}
+
+.form-field input:focus-visible {
+    border-color: var(--color-accent, #b69aff);
+    box-shadow: 0 0 0 3px var(--color-glow, rgb(153 113 255 / 22%));
+}
+
+.remember-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 68px;
+    padding: 11px 13px;
+    border: 1px solid var(--color-border, #393249);
+    border-radius: 10px;
+    color: var(--color-text, #f7f3ff);
+    background: var(--color-background, #100e1a);
+    cursor: pointer;
+    transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.remember-card:has(input:checked) {
+    border-color: var(--color-accent, #b69aff);
+    background: var(--color-surface-raised, #242034);
+}
+
+.remember-card input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.remember-card__icon {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid var(--color-border, #393249);
+    border-radius: 9px;
+    color: var(--color-accent, #b69aff);
+    background: var(--color-surface, #1b1828);
+}
+
+.remember-card__icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.remember-card__copy {
+    display: grid;
+    flex: 1;
+    gap: 3px;
+}
+
+.remember-card__title {
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.remember-card__description {
+    color: var(--color-muted, #aaa3ba);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.remember-card__indicator {
+    display: grid;
+    width: 19px;
+    height: 19px;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid var(--color-border, #393249);
+    border-radius: 6px;
+    color: var(--color-accent-contrast, #171121);
+    transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.remember-card__indicator::after {
+    width: 5px;
+    height: 9px;
+    border: solid currentColor;
+    border-width: 0 2px 2px 0;
+    content: '';
+    opacity: 0;
+    transform: translateY(-1px) rotate(45deg);
+}
+
+.remember-card:has(input:checked) .remember-card__indicator {
+    border-color: var(--color-accent, #b69aff);
+    background: var(--color-accent, #b69aff);
+}
+
+.remember-card:has(input:checked) .remember-card__indicator::after {
+    opacity: 1;
+}
+
+.login-submit {
+    min-height: 46px;
+    margin-top: 2px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 9px;
+    color: var(--color-accent-contrast, #171121);
+    background: var(--color-accent, #b69aff);
+    cursor: pointer;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 750;
+    transition: filter 160ms ease, transform 160ms ease;
+}
+
+.login-submit:hover {
+    filter: brightness(1.08);
+}
+
+.login-submit:active {
+    transform: translateY(1px);
+}
+
+.login-submit:focus-visible {
+    outline: 2px solid var(--color-accent, #b69aff);
+    outline-offset: 3px;
+}

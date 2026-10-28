@@ -1,2 +1,48 @@
-<p>login works!</p>
-<button (click)="login()">LogIn</button>
+<form class="login-form" (submit)="login($event)">
+    <div class="form-field">
+        <label for="login-username">{{ i18n.text.loginLabel }}</label>
+        <input
+            id="login-username"
+            name="username"
+            type="text"
+            autocomplete="username"
+            [placeholder]="i18n.text.usernamePlaceholder"
+            required
+        />
+    </div>
+
+    <div class="form-field">
+        <label for="login-password">{{ i18n.text.passwordLabel }}</label>
+        <input
+            id="login-password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            [placeholder]="i18n.text.loginPasswordPlaceholder"
+            required
+        />
+    </div>
+
+    <label class="remember-card">
+        <input
+            id="remember-me"
+            name="remember"
+            type="checkbox"
+            [checked]="rememberMe"
+            (change)="updateRememberMe($event)"
+        />
+        <span class="remember-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+                <rect x="4" y="5" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.7" />
+                <path d="M9 21h6m-3-4v4" stroke="currentColor" stroke-linecap="round" stroke-width="1.7" />
+            </svg>
+        </span>
+        <span class="remember-card__copy">
+            <span class="remember-card__title">{{ i18n.text.rememberMe }}</span>
+            <span class="remember-card__description">{{ i18n.text.rememberDescription }}</span>
+        </span>
+        <span class="remember-card__indicator" aria-hidden="true"></span>
+    </label>
+
+    <button class="login-submit" type="submit">{{ i18n.text.loginSubmit }}</button>
+</form>

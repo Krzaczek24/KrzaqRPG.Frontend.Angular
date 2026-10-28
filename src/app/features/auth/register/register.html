@@ -1,1 +1,39 @@
-<p>register works!</p>
+<form class="register-form" (submit)="$event.preventDefault()">
+    <div class="form-field">
+        <label for="register-username">{{ i18n.text.loginLabel }}</label>
+        <input
+            id="register-username"
+            name="username"
+            type="text"
+            autocomplete="username"
+            [placeholder]="i18n.text.registerUsernamePlaceholder"
+            required
+        />
+    </div>
+
+    <div class="form-field">
+        <label for="register-password">{{ i18n.text.passwordLabel }}</label>
+        <input
+            id="register-password"
+            name="password"
+            type="password"
+            autocomplete="new-password"
+            [placeholder]="i18n.text.registerPasswordPlaceholder"
+            required
+        />
+    </div>
+
+    <div class="form-field">
+        <label for="register-password-confirmation">{{ i18n.text.passwordConfirmationLabel }}</label>
+        <input
+            id="register-password-confirmation"
+            name="passwordConfirmation"
+            type="password"
+            autocomplete="new-password"
+            [placeholder]="i18n.text.passwordConfirmationPlaceholder"
+            required
+        />
+    </div>
+
+    <button class="register-submit" type="submit">{{ i18n.text.registerSubmit }}</button>
+</form>

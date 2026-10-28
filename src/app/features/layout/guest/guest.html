@@ -1,4 +1,160 @@
-<p>guest works!</p>
-<button (click)="router.navigate(['/login'])">Login</button>
-<button (click)="router.navigate(['/register'])">Registration</button>
-<router-outlet></router-outlet>
+<main class="guest-shell" [attr.data-palette]="selectedPalette">
+    <section class="auth-panel" [attr.aria-label]="i18n.text.authNavigationLabel">
+        <header class="brand">
+            <div class="brand__identity">
+                <div class="brand__mark" aria-hidden="true">K</div>
+                <div>
+                    <p class="brand__name">KRZAQ <span>RPG</span></p>
+                    <p class="brand__tagline">{{ i18n.text.brandTagline }}</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="panel-content">
+            <p class="eyebrow">{{ i18n.text.welcome }}</p>
+            <h1>{{ i18n.text.heading }}</h1>
+            <p class="intro">{{ i18n.text.intro }}</p>
+
+            <nav class="auth-tabs" [attr.aria-label]="i18n.text.authNavigationLabel">
+                <a routerLink="/login" routerLinkActive="auth-tabs__link--active" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page">
+                    {{ i18n.text.loginTab }}
+                </a>
+                <a routerLink="/register" routerLinkActive="auth-tabs__link--active" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page">
+                    {{ i18n.text.registerTab }}
+                </a>
+            </nav>
+
+            <div class="auth-content">
+                <router-outlet></router-outlet>
+            </div>
+
+            <section class="appearance-controls">
+                <div class="appearance-control palette-picker">
+                    <span class="appearance-control__label">{{ i18n.text.paletteLabel }}</span>
+                    <div class="appearance-dropdown theme-dropdown">
+                        <button
+                            class="appearance-dropdown__trigger"
+                            type="button"
+                            aria-controls="theme-options"
+                            [attr.aria-expanded]="openDropdown === 'theme'"
+                            [attr.aria-label]="i18n.text.paletteLabel + ': ' + selectedPaletteLabel"
+                            (click)="toggleDropdown('theme'); $event.stopPropagation()"
+                        >
+                            <span>{{ selectedPaletteLabel }}</span>
+                            <span class="appearance-dropdown__chevron" [class.appearance-dropdown__chevron--open]="openDropdown === 'theme'" aria-hidden="true"></span>
+                        </button>
+                        @if (openDropdown === 'theme') {
+                            <div class="appearance-dropdown__menu" id="theme-options" role="listbox" [attr.aria-label]="i18n.text.paletteLabel" (click)="$event.stopPropagation()">
+                                @for (option of paletteOptions; track option.value) {
+                                    <button
+                                        class="appearance-dropdown__option"
+                                        type="button"
+                                        role="option"
+                                        [attr.aria-selected]="selectedPalette === option.value"
+                                        (click)="selectPalette(option.value); openDropdown = null"
+                                    >
+                                        <span class="appearance-dropdown__swatch" [attr.data-theme]="option.value" aria-hidden="true"></span>
+                                        <span>{{ option.label }}</span>
+                                        @if (selectedPalette === option.value) {
+                                            <span class="appearance-dropdown__check" aria-hidden="true">✓</span>
+                                        }
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
+                    <div class="palette-picker__options">
+                        <button
+                            class="palette-option palette-option--arcane"
+                            type="button"
+                            [attr.data-tooltip]="i18n.text.paletteArcane"
+                            [attr.aria-label]="i18n.text.paletteArcane"
+                            [attr.aria-pressed]="selectedPalette === 'arcane'"
+                            (click)="selectedPalette = 'arcane'"
+                        ><span class="sr-only">{{ i18n.text.paletteArcane }}</span></button>
+                        <button
+                            class="palette-option palette-option--forest"
+                            type="button"
+                            [attr.data-tooltip]="i18n.text.paletteForest"
+                            [attr.aria-label]="i18n.text.paletteForest"
+                            [attr.aria-pressed]="selectedPalette === 'forest'"
+                            (click)="selectedPalette = 'forest'"
+                        ><span class="sr-only">{{ i18n.text.paletteForest }}</span></button>
+                        <button
+                            class="palette-option palette-option--ember"
+                            type="button"
+                            [attr.data-tooltip]="i18n.text.paletteEmber"
+                            [attr.aria-label]="i18n.text.paletteEmber"
+                            [attr.aria-pressed]="selectedPalette === 'ember'"
+                            (click)="selectedPalette = 'ember'"
+                        ><span class="sr-only">{{ i18n.text.paletteEmber }}</span></button>
+                        <button
+                            class="palette-option palette-option--ocean"
+                            type="button"
+                            [attr.data-tooltip]="i18n.text.paletteOcean"
+                            [attr.aria-label]="i18n.text.paletteOcean"
+                            [attr.aria-pressed]="selectedPalette === 'ocean'"
+                            (click)="selectedPalette = 'ocean'"
+                        ><span class="sr-only">{{ i18n.text.paletteOcean }}</span></button>
+                        <button
+                            class="palette-option palette-option--royal"
+                            type="button"
+                            [attr.data-tooltip]="i18n.text.paletteRoyal"
+                            [attr.aria-label]="i18n.text.paletteRoyal"
+                            [attr.aria-pressed]="selectedPalette === 'royal'"
+                            (click)="selectedPalette = 'royal'"
+                        ><span class="sr-only">{{ i18n.text.paletteRoyal }}</span></button>
+                        <button
+                            class="palette-option palette-option--tavern"
+                            type="button"
+                            [attr.data-tooltip]="i18n.text.paletteTavern"
+                            [attr.aria-label]="i18n.text.paletteTavern"
+                            [attr.aria-pressed]="selectedPalette === 'tavern'"
+                            (click)="selectedPalette = 'tavern'"
+                        ><span class="sr-only">{{ i18n.text.paletteTavern }}</span></button>
+                    </div>
+                </div>
+
+                <div class="appearance-control language-picker">
+                    <span class="appearance-control__label">{{ i18n.text.languageLabel }}</span>
+                    <div class="appearance-dropdown">
+                        <button
+                            class="appearance-dropdown__trigger"
+                            type="button"
+                            aria-controls="language-options"
+                            [attr.aria-expanded]="openDropdown === 'language'"
+                            [attr.aria-label]="i18n.text.languageLabel + ': ' + currentLanguage.label"
+                            (click)="toggleDropdown('language'); $event.stopPropagation()"
+                        >
+                            <span>{{ currentLanguage.label }}</span>
+                            <span class="appearance-dropdown__chevron" [class.appearance-dropdown__chevron--open]="openDropdown === 'language'" aria-hidden="true"></span>
+                        </button>
+                        @if (openDropdown === 'language') {
+                            <div class="appearance-dropdown__menu" id="language-options" role="listbox" [attr.aria-label]="i18n.text.languageLabel" (click)="$event.stopPropagation()">
+                                @for (language of languageOptions; track language.code) {
+                                    <button
+                                        class="appearance-dropdown__option"
+                                        type="button"
+                                        role="option"
+                                        [attr.aria-selected]="i18n.language() === language.code"
+                                        (click)="selectLanguage(language.code); openDropdown = null"
+                                    >
+                                        <span>{{ language.label }}</span>
+                                        @if (i18n.language() === language.code) {
+                                            <span class="appearance-dropdown__check" aria-hidden="true">✓</span>
+                                        }
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <footer class="panel-footer">
+            <span>© 2026 Krzaq RPG</span>
+            <span>{{ i18n.text.footerTagline }}</span>
+        </footer>
+    </section>
+</main>
