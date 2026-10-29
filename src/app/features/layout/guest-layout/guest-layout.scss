@@ -30,13 +30,6 @@
     box-shadow:
         0 28px 80px rgb(0 0 0 / 32%),
         0 0 80px var(--color-glow);
-    user-select: none;
-}
-
-.auth-panel input:not([type='checkbox']),
-.auth-panel textarea,
-.auth-panel [contenteditable='true'] {
-    user-select: text;
 }
 
 .brand {

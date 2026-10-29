@@ -71,12 +71,19 @@
 
 * {
     box-sizing: border-box;
+    user-select: none;
 }
 
 body {
     min-width: 320px;
     min-height: 100vh;
     margin: 0;
+}
+
+input:not([type='checkbox']),
+textarea,
+[contenteditable='true'] {
+    user-select: text;
 }
 
 :is(.guest-shell, .main-layout) {
