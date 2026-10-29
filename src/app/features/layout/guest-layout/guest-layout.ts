@@ -2,55 +2,44 @@ import { Component, HostListener, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { isLanguage } from '../../../core/i18n/translations';
-
-const PALETTES = ['arcane', 'forest', 'ember', 'ocean', 'royal', 'tavern'] as const;
-type Palette = (typeof PALETTES)[number];
-const PALETTE_STORAGE_KEY = 'krzaq-rpg:guest-palette';
-
-function isPalette(value: string | null): value is Palette {
-    return PALETTES.some((palette) => palette === value);
-}
+import { PALETTES, Palette, ThemeService } from '../../../core/theme';
 
 @Component({
     imports: [RouterLink, RouterLinkActive, RouterOutlet],
-    selector: 'app-guest',
-    styleUrl: './guest.scss',
-    templateUrl: './guest.html',
+    selector: 'app-guest-layout',
+    styleUrl: './guest-layout.scss',
+    templateUrl: './guest-layout.html',
 })
-export class Guest {
+export class GuestLayout {
     public readonly i18n = inject(I18nService);
+    public readonly theme = inject(ThemeService);
     public readonly languageOptions = [
         { code: 'pl', label: 'Polski' },
         { code: 'uk', label: 'Українська' },
         { code: 'en', label: 'English' },
     ] as const;
     public openDropdown: 'theme' | 'language' | null = null;
-    private palette: Palette = 'arcane';
-
-    constructor() {
-        const savedPalette = localStorage.getItem(PALETTE_STORAGE_KEY);
-        if (isPalette(savedPalette)) {
-            this.palette = savedPalette;
-        }
-    }
-
     public get selectedPalette(): Palette {
-        return this.palette;
+        return this.theme.selectedPalette();
     }
 
     public get currentLanguage() {
-        return this.languageOptions.find(({ code }) => code === this.i18n.language()) ?? this.languageOptions[0];
+        return (
+            this.languageOptions.find(({ code }) => code === this.i18n.language()) ??
+            this.languageOptions[0]
+        );
     }
 
     public get paletteOptions() {
-        return [
-            { value: 'arcane', label: this.i18n.text.paletteArcane },
-            { value: 'forest', label: this.i18n.text.paletteForest },
-            { value: 'ember', label: this.i18n.text.paletteEmber },
-            { value: 'ocean', label: this.i18n.text.paletteOcean },
-            { value: 'royal', label: this.i18n.text.paletteRoyal },
-            { value: 'tavern', label: this.i18n.text.paletteTavern },
-        ] as const;
+        const labels: Record<Palette, string> = {
+            arcane: this.i18n.text.paletteArcane,
+            forest: this.i18n.text.paletteForest,
+            ember: this.i18n.text.paletteEmber,
+            ocean: this.i18n.text.paletteOcean,
+            royal: this.i18n.text.paletteRoyal,
+            tavern: this.i18n.text.paletteTavern,
+        };
+        return PALETTES.map((value) => ({ value, label: labels[value] }));
     }
 
     public get selectedPaletteLabel(): string {
@@ -58,14 +47,11 @@ export class Guest {
     }
 
     public set selectedPalette(palette: Palette) {
-        this.palette = palette;
-        localStorage.setItem(PALETTE_STORAGE_KEY, palette);
+        this.theme.selectPalette(palette);
     }
 
     public selectPalette(palette: string): void {
-        if (isPalette(palette)) {
-            this.selectedPalette = palette;
-        }
+        this.theme.selectPalette(palette);
     }
 
     public toggleDropdown(dropdown: 'theme' | 'language'): void {

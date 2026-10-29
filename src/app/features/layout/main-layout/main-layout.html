@@ -1,7 +1,123 @@
-<p>main-layout works!</p>
-<button (click)="router.navigate(['/world-map'])">World map</button>
-<button (click)="router.navigate(['/inventory'])">Inventory</button>
-<button (click)="router.navigate(['/options'])">Options</button>
-<br />
-<button (click)="logout()">LogOut</button>
-<router-outlet></router-outlet>
+<div class="main-layout" [attr.data-palette]="theme.selectedPalette()">
+    <header class="main-layout__top">
+        <a
+            class="main-layout__control main-layout__nav-link"
+            routerLink="/world-map"
+            routerLinkActive="main-layout__nav-link--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            ariaCurrentWhenActive="page"
+            >{{ i18n.text.worldMap }}</a
+        >
+        <a
+            class="main-layout__control main-layout__nav-link"
+            routerLink="/inventory"
+            routerLinkActive="main-layout__nav-link--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            ariaCurrentWhenActive="page"
+            >{{ i18n.text.inventory }}</a
+        >
+        <a
+            class="main-layout__control main-layout__nav-link"
+            routerLink="/options"
+            routerLinkActive="main-layout__nav-link--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            ariaCurrentWhenActive="page"
+        >
+            {{ i18n.text.options }}</a
+        >
+    </header>
+
+    <aside class="main-layout__side" aria-label="Lewy panel">
+        <a
+            class="main-layout__control main-layout__nav-link"
+            routerLink="/world-map"
+            routerLinkActive="main-layout__nav-link--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            ariaCurrentWhenActive="page"
+            >{{ i18n.text.worldMap }}</a
+        >
+        <a
+            class="main-layout__control main-layout__nav-link"
+            routerLink="/inventory"
+            routerLinkActive="main-layout__nav-link--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            ariaCurrentWhenActive="page"
+            >{{ i18n.text.inventory }}</a
+        >
+        <a
+            class="main-layout__control main-layout__nav-link"
+            routerLink="/options"
+            routerLinkActive="main-layout__nav-link--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            ariaCurrentWhenActive="page"
+            >{{ i18n.text.options }}</a
+        >
+    </aside>
+
+    <main class="main-layout__content">
+        <router-outlet></router-outlet>
+    </main>
+
+    <aside class="main-layout__side" aria-label="Prawy panel">
+        <a
+            class="main-layout__control main-layout__nav-link"
+            routerLink="/world-map"
+            routerLinkActive="main-layout__nav-link--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            ariaCurrentWhenActive="page"
+            >{{ i18n.text.worldMap }}</a
+        >
+        <a
+            class="main-layout__control main-layout__nav-link"
+            routerLink="/inventory"
+            routerLinkActive="main-layout__nav-link--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            ariaCurrentWhenActive="page"
+            >{{ i18n.text.inventory }}</a
+        >
+        <a
+            class="main-layout__control main-layout__nav-link"
+            routerLink="/options"
+            routerLinkActive="main-layout__nav-link--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            ariaCurrentWhenActive="page"
+            >{{ i18n.text.options }}</a
+        >
+    </aside>
+
+    <footer class="main-layout__bottom">
+        <span class="main-layout__copyright">© 2026 Krzaq RPG</span>
+        <time class="main-layout__clock" aria-label="Current time">{{ clockTime() }}</time>
+        <div class="main-layout__footer-actions">
+            <div class="main-layout__durations">
+                <div class="main-layout__duration">
+                    <span>{{ i18n.text.sessionDuration }}</span>
+                    <time [attr.aria-label]="i18n.text.sessionDuration">{{
+                        sessionDuration()
+                    }}</time>
+                </div>
+                <div class="main-layout__duration">
+                    <span>{{ i18n.text.totalPlaytime }}</span>
+                    <time [attr.aria-label]="i18n.text.totalPlaytime">{{ totalPlaytime() }}</time>
+                </div>
+            </div>
+            <button
+                class="main-layout__logout"
+                type="button"
+                [attr.aria-label]="i18n.text.logout"
+                [attr.data-tooltip]="i18n.text.logout"
+                (click)="logout()"
+            >
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                        d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l4-4-4-4m4 4H3"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.7"
+                    />
+                </svg>
+            </button>
+        </div>
+    </footer>
+</div>

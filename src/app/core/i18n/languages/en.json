@@ -7,6 +7,12 @@
     "intro": "Log in or create an account to continue your journey.",
     "loginTab": "Log in",
     "registerTab": "Register",
+    "worldMap": "World map",
+    "inventory": "Inventory",
+    "options": "Options",
+    "logout": "Log out",
+    "sessionDuration": "Time since login",
+    "totalPlaytime": "Total playtime",
     "paletteLabel": "Theme",
     "paletteArcane": "Arcane",
     "paletteForest": "Emerald Forest",
@@ -26,5 +32,6 @@
     "registerPasswordPlaceholder": "Create a password",
     "passwordConfirmationLabel": "Confirm password",
     "passwordConfirmationPlaceholder": "Enter your password again",
-    "registerSubmit": "Create account"
+    "registerSubmit": "Create account",
+    "requiredField": "This field is required"
 }

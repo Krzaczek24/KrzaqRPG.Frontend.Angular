@@ -10,8 +10,17 @@
 }
 
 .form-field label {
-    font-size: 13px;
+    font-size: 0.839286rem;
     font-weight: 650;
+}
+
+.form-field__error {
+    color: var(--color-accent, #b69aff);
+    font-size: 0.785714rem;
+}
+
+.form-field input[aria-invalid='true'] {
+    border-color: var(--color-accent, #b69aff);
 }
 
 .form-field input {
@@ -24,8 +33,10 @@
     color: var(--color-text, #f7f3ff);
     background: var(--color-background, #100e1a);
     font: inherit;
-    font-size: 14px;
-    transition: border-color 160ms ease, box-shadow 160ms ease;
+    font-size: 0.892857rem;
+    transition:
+        border-color 160ms ease,
+        box-shadow 160ms ease;
 }
 
 .form-field input::placeholder {
@@ -44,13 +55,15 @@
     align-items: center;
     gap: 12px;
     min-height: 68px;
-    padding: 11px 13px;
+    padding: 14px;
     border: 1px solid var(--color-border, #393249);
     border-radius: 10px;
     color: var(--color-text, #f7f3ff);
     background: var(--color-background, #100e1a);
     cursor: pointer;
-    transition: border-color 160ms ease, background-color 160ms ease;
+    transition:
+        border-color 160ms ease,
+        background-color 160ms ease;
 }
 
 .remember-card:has(input:checked) {
@@ -92,26 +105,29 @@
 }
 
 .remember-card__title {
-    font-size: 13px;
+    font-size: 0.839286rem;
     font-weight: 650;
+    line-height: 1.1;
 }
 
 .remember-card__description {
     color: var(--color-muted, #aaa3ba);
-    font-size: 11px;
-    line-height: 1.4;
+    font-size: 0.732143rem;
+    line-height: 1.1;
 }
 
 .remember-card__indicator {
     display: grid;
-    width: 19px;
-    height: 19px;
+    width: 36px;
+    height: 36px;
     flex: 0 0 auto;
     place-items: center;
     border: 1px solid var(--color-border, #393249);
-    border-radius: 6px;
+    border-radius: 9px;
     color: var(--color-accent-contrast, #171121);
-    transition: border-color 160ms ease, background-color 160ms ease;
+    transition:
+        border-color 160ms ease,
+        background-color 160ms ease;
 }
 
 .remember-card__indicator::after {
@@ -143,9 +159,11 @@
     background: var(--color-accent, #b69aff);
     cursor: pointer;
     font: inherit;
-    font-size: 14px;
+    font-size: 0.892857rem;
     font-weight: 750;
-    transition: filter 160ms ease, transform 160ms ease;
+    transition:
+        filter 160ms ease,
+        transform 160ms ease;
 }
 
 .login-submit:hover {

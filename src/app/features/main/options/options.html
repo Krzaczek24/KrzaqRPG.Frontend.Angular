@@ -1,1 +1,120 @@
-<p>options works!</p>
+<section class="options-page" aria-labelledby="options-title">
+    <h1 id="options-title">{{ i18n.text.options }}</h1>
+    <section
+        class="options-page__settings appearance-controls"
+        [attr.aria-label]="i18n.text.paletteLabel + ' / ' + i18n.text.languageLabel"
+    >
+        <div class="appearance-control palette-picker">
+            <span class="appearance-control__label">{{ i18n.text.paletteLabel }}</span>
+            <div class="appearance-dropdown theme-dropdown">
+                <button
+                    class="appearance-dropdown__trigger"
+                    type="button"
+                    aria-controls="theme-options"
+                    [attr.aria-expanded]="openDropdown === 'theme'"
+                    [attr.aria-label]="i18n.text.paletteLabel + ': ' + selectedPaletteLabel"
+                    (click)="toggleDropdown('theme'); $event.stopPropagation()"
+                >
+                    <span>{{ selectedPaletteLabel }}</span>
+                    <span
+                        class="appearance-dropdown__chevron"
+                        [class.appearance-dropdown__chevron--open]="openDropdown === 'theme'"
+                        aria-hidden="true"
+                    ></span>
+                </button>
+                @if (openDropdown === 'theme') {
+                    <div
+                        class="appearance-dropdown__menu"
+                        id="theme-options"
+                        role="listbox"
+                        [attr.aria-label]="i18n.text.paletteLabel"
+                        (click)="$event.stopPropagation()"
+                    >
+                        @for (option of paletteOptions; track option.value) {
+                            <button
+                                class="appearance-dropdown__option"
+                                type="button"
+                                role="option"
+                                [attr.aria-selected]="theme.selectedPalette() === option.value"
+                                (click)="theme.selectPalette(option.value); openDropdown = null"
+                            >
+                                <span
+                                    class="appearance-dropdown__swatch"
+                                    [attr.data-theme]="option.value"
+                                    aria-hidden="true"
+                                ></span>
+                                <span>{{ option.label }}</span>
+                                @if (theme.selectedPalette() === option.value) {
+                                    <span class="appearance-dropdown__check" aria-hidden="true"
+                                        >✓</span
+                                    >
+                                }
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="palette-picker__options">
+                @for (option of paletteOptions; track option.value) {
+                    <button
+                        [class]="'palette-option palette-option--' + option.value"
+                        type="button"
+                        [attr.data-tooltip]="option.label"
+                        [attr.aria-label]="option.label"
+                        [attr.aria-pressed]="theme.selectedPalette() === option.value"
+                        (click)="theme.selectPalette(option.value)"
+                    >
+                        <span class="sr-only">{{ option.label }}</span>
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="appearance-control language-picker">
+            <span class="appearance-control__label">{{ i18n.text.languageLabel }}</span>
+            <div class="appearance-dropdown">
+                <button
+                    class="appearance-dropdown__trigger"
+                    type="button"
+                    aria-controls="language-options"
+                    [attr.aria-expanded]="openDropdown === 'language'"
+                    [attr.aria-label]="i18n.text.languageLabel + ': ' + currentLanguage.label"
+                    (click)="toggleDropdown('language'); $event.stopPropagation()"
+                >
+                    <span>{{ currentLanguage.label }}</span>
+                    <span
+                        class="appearance-dropdown__chevron"
+                        [class.appearance-dropdown__chevron--open]="openDropdown === 'language'"
+                        aria-hidden="true"
+                    ></span>
+                </button>
+                @if (openDropdown === 'language') {
+                    <div
+                        class="appearance-dropdown__menu"
+                        id="language-options"
+                        role="listbox"
+                        [attr.aria-label]="i18n.text.languageLabel"
+                        (click)="$event.stopPropagation()"
+                    >
+                        @for (language of languageOptions; track language.code) {
+                            <button
+                                class="appearance-dropdown__option"
+                                type="button"
+                                role="option"
+                                [attr.aria-selected]="i18n.language() === language.code"
+                                (click)="selectLanguage(language.code); openDropdown = null"
+                            >
+                                <span>{{ language.label }}</span>
+                                @if (i18n.language() === language.code) {
+                                    <span class="appearance-dropdown__check" aria-hidden="true"
+                                        >✓</span
+                                    >
+                                }
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+</section>

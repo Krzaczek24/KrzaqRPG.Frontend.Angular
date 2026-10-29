@@ -1,31 +1,33 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { Guest } from './guest';
+import { PALETTE_STORAGE_KEY, ThemeService } from '../../../core/theme';
+import { GuestLayout } from './guest-layout';
 
-const PALETTE_STORAGE_KEY = 'krzaq-rpg:guest-palette';
 const LANGUAGE_STORAGE_KEY = 'krzaq-rpg:language';
 
 @Component({ template: '' })
 class RouteStub {}
 
-describe('Guest', () => {
-    let component: Guest;
-    let fixture: ComponentFixture<Guest>;
+describe('GuestLayout', () => {
+    let component: GuestLayout;
+    let fixture: ComponentFixture<GuestLayout>;
 
     beforeEach(async () => {
         localStorage.removeItem(PALETTE_STORAGE_KEY);
         localStorage.removeItem(LANGUAGE_STORAGE_KEY);
 
         await TestBed.configureTestingModule({
-            imports: [Guest],
-            providers: [provideRouter([
-                { path: 'login', component: RouteStub },
-                { path: 'register', component: RouteStub },
-            ])],
+            imports: [GuestLayout],
+            providers: [
+                provideRouter([
+                    { path: 'login', component: RouteStub },
+                    { path: 'register', component: RouteStub },
+                ]),
+            ],
         }).compileComponents();
 
-        fixture = TestBed.createComponent(Guest);
+        fixture = TestBed.createComponent(GuestLayout);
         component = fixture.componentInstance;
         await fixture.whenStable();
     });
@@ -64,7 +66,9 @@ describe('Guest', () => {
     it('should provide a styled tooltip label for each color palette', () => {
         const paletteButtons = fixture.nativeElement.querySelectorAll('.palette-option');
 
-        expect(Array.from(paletteButtons, (button: Element) => button.getAttribute('data-tooltip'))).toEqual([
+        expect(
+            Array.from(paletteButtons, (button: Element) => button.getAttribute('data-tooltip')),
+        ).toEqual([
             'Arkana',
             'Szmaragdowy las',
             'Smoczy żar',
@@ -75,33 +79,53 @@ describe('Guest', () => {
     });
 
     it('should display a theme label and provide a styled dropdown fallback for narrow layouts', () => {
-        expect(fixture.nativeElement.querySelector('.palette-picker .appearance-control__label')?.textContent?.trim())
-            .toBe('Motyw');
-        expect(fixture.nativeElement.querySelector('.theme-dropdown .appearance-dropdown__trigger')).toBeTruthy();
+        expect(
+            fixture.nativeElement
+                .querySelector('.palette-picker .appearance-control__label')
+                ?.textContent?.trim(),
+        ).toBe('Motyw');
+        expect(
+            fixture.nativeElement.querySelector('.theme-dropdown .appearance-dropdown__trigger'),
+        ).toBeTruthy();
         expect(fixture.nativeElement.querySelectorAll('.palette-option')).toHaveLength(6);
     });
 
     it('should show theme and language controls in the same appearance row', () => {
         const appearanceControls = fixture.nativeElement.querySelector('.appearance-controls');
-        expect(appearanceControls.querySelector('.theme-dropdown .appearance-dropdown__trigger')).toBeTruthy();
-        expect(appearanceControls.querySelector('.language-picker .appearance-dropdown__trigger')).toBeTruthy();
+        expect(
+            appearanceControls.querySelector('.theme-dropdown .appearance-dropdown__trigger'),
+        ).toBeTruthy();
+        expect(
+            appearanceControls.querySelector('.language-picker .appearance-dropdown__trigger'),
+        ).toBeTruthy();
     });
 
     it('should change the interface language and save the selection', () => {
-        fixture.nativeElement.querySelector('.language-picker .appearance-dropdown__trigger').click();
+        fixture.nativeElement
+            .querySelector('.language-picker .appearance-dropdown__trigger')
+            .click();
         fixture.detectChanges();
-        fixture.nativeElement.querySelector('#language-options [role="option"]:nth-child(2)').click();
+        fixture.nativeElement
+            .querySelector('#language-options [role="option"]:nth-child(2)')
+            .click();
         fixture.detectChanges();
 
-        expect(fixture.nativeElement.querySelector('h1')?.textContent?.trim()).toBe('Увійди у світ пригод');
-        expect(fixture.nativeElement.querySelector('.palette-option--forest').getAttribute('data-tooltip'))
-            .toBe('Смарагдовий ліс');
+        expect(fixture.nativeElement.querySelector('h1')?.textContent?.trim()).toBe(
+            'Увійди у світ пригод',
+        );
+        expect(
+            fixture.nativeElement
+                .querySelector('.palette-option--forest')
+                .getAttribute('data-tooltip'),
+        ).toBe('Смарагдовий ліс');
         expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe('uk');
         expect(document.documentElement.lang).toBe('uk');
     });
 
     it('should render a themed dropdown menu with rounded theme-colored borders', () => {
-        fixture.nativeElement.querySelector('.language-picker .appearance-dropdown__trigger').click();
+        fixture.nativeElement
+            .querySelector('.language-picker .appearance-dropdown__trigger')
+            .click();
         fixture.detectChanges();
 
         const menu = fixture.nativeElement.querySelector('#language-options') as HTMLElement;
@@ -109,8 +133,11 @@ describe('Guest', () => {
         expect(menu.classList.contains('appearance-dropdown__menu')).toBe(true);
         expect(menu.getAttribute('role')).toBe('listbox');
         expect(menu.querySelectorAll('.appearance-dropdown__option')).toHaveLength(3);
-        expect(fixture.nativeElement.querySelector('.language-picker .appearance-control__label')?.textContent?.trim())
-            .toBe('Język');
+        expect(
+            fixture.nativeElement
+                .querySelector('.language-picker .appearance-control__label')
+                ?.textContent?.trim(),
+        ).toBe('Język');
     });
 
     it('should allow selecting a theme from the dots and dropdown', () => {
@@ -125,8 +152,11 @@ describe('Guest', () => {
         expect(fixture.nativeElement.querySelector('.guest-shell').dataset.palette).toBe('tavern');
         expect(paletteButtons[5].getAttribute('aria-pressed')).toBe('true');
         expect(localStorage.getItem(PALETTE_STORAGE_KEY)).toBe('tavern');
+        expect(TestBed.inject(ThemeService).selectedPalette()).toBe('tavern');
 
-        fixture.nativeElement.querySelector('.theme-dropdown .appearance-dropdown__trigger').click();
+        fixture.nativeElement
+            .querySelector('.theme-dropdown .appearance-dropdown__trigger')
+            .click();
         fixture.detectChanges();
         fixture.nativeElement.querySelector('#theme-options [role="option"]:nth-child(2)').click();
         fixture.detectChanges();
@@ -135,18 +165,21 @@ describe('Guest', () => {
         expect(localStorage.getItem(PALETTE_STORAGE_KEY)).toBe('forest');
     });
 
-    it('should restore a saved palette when the component is created', async () => {
-        localStorage.setItem(PALETTE_STORAGE_KEY, 'royal');
-        const restoredFixture = TestBed.createComponent(Guest);
+    it('should reflect the shared palette when the component is created', async () => {
+        TestBed.inject(ThemeService).selectPalette('royal');
+        const restoredFixture = TestBed.createComponent(GuestLayout);
+        restoredFixture.detectChanges();
         await restoredFixture.whenStable();
 
-        expect(restoredFixture.nativeElement.querySelector('.guest-shell').dataset.palette).toBe('royal');
+        expect(restoredFixture.nativeElement.querySelector('.guest-shell').dataset.palette).toBe(
+            'royal',
+        );
         restoredFixture.destroy();
     });
 
     it('should use the default palette when the stored value is invalid', () => {
         localStorage.setItem(PALETTE_STORAGE_KEY, 'unknown');
-        const freshFixture = TestBed.createComponent(Guest);
+        const freshFixture = TestBed.createComponent(GuestLayout);
 
         expect(freshFixture.componentInstance.selectedPalette).toBe('arcane');
         freshFixture.destroy();

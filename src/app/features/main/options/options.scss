@@ -1,0 +1,27 @@
+.options-page {
+    container-type: inline-size;
+    padding: 18px 24px 24px;
+}
+
+.options-page h1 {
+    margin: 0 0 20px;
+}
+
+.options-page__settings {
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 20px;
+    width: min(100%, 360px);
+    margin: 0;
+}
+
+.options-page__settings .appearance-control {
+    width: 100%;
+    justify-content: space-between;
+}
+
+.options-page .appearance-dropdown__menu {
+    top: calc(100% + 8px);
+    bottom: auto;
+}

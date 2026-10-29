@@ -1,4 +1,4 @@
-<form class="register-form" (submit)="$event.preventDefault()">
+<form #registerForm="ngForm" class="register-form" novalidate (ngSubmit)="submit(registerForm)">
     <div class="form-field">
         <label for="register-username">{{ i18n.text.loginLabel }}</label>
         <input
@@ -8,7 +8,18 @@
             autocomplete="username"
             [placeholder]="i18n.text.registerUsernamePlaceholder"
             required
+            ngModel
+            #username="ngModel"
+            [attr.aria-invalid]="submitted && username.invalid"
+            [attr.aria-describedby]="
+                submitted && username.invalid ? 'register-username-error' : null
+            "
         />
+        @if (submitted && username.invalid) {
+            <span class="form-field__error" id="register-username-error" role="alert">
+                {{ i18n.text.requiredField }}
+            </span>
+        }
     </div>
 
     <div class="form-field">
@@ -20,11 +31,24 @@
             autocomplete="new-password"
             [placeholder]="i18n.text.registerPasswordPlaceholder"
             required
+            ngModel
+            #password="ngModel"
+            [attr.aria-invalid]="submitted && password.invalid"
+            [attr.aria-describedby]="
+                submitted && password.invalid ? 'register-password-error' : null
+            "
         />
+        @if (submitted && password.invalid) {
+            <span class="form-field__error" id="register-password-error" role="alert">
+                {{ i18n.text.requiredField }}
+            </span>
+        }
     </div>
 
     <div class="form-field">
-        <label for="register-password-confirmation">{{ i18n.text.passwordConfirmationLabel }}</label>
+        <label for="register-password-confirmation">{{
+            i18n.text.passwordConfirmationLabel
+        }}</label>
         <input
             id="register-password-confirmation"
             name="passwordConfirmation"
@@ -32,7 +56,20 @@
             autocomplete="new-password"
             [placeholder]="i18n.text.passwordConfirmationPlaceholder"
             required
+            ngModel
+            #passwordConfirmation="ngModel"
+            [attr.aria-invalid]="submitted && passwordConfirmation.invalid"
+            [attr.aria-describedby]="
+                submitted && passwordConfirmation.invalid
+                    ? 'register-password-confirmation-error'
+                    : null
+            "
         />
+        @if (submitted && passwordConfirmation.invalid) {
+            <span class="form-field__error" id="register-password-confirmation-error" role="alert">
+                {{ i18n.text.requiredField }}
+            </span>
+        }
     </div>
 
     <button class="register-submit" type="submit">{{ i18n.text.registerSubmit }}</button>

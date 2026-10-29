@@ -7,6 +7,12 @@
     "intro": "Zaloguj się lub stwórz konto, aby kontynuować swoją podróż.",
     "loginTab": "Logowanie",
     "registerTab": "Rejestracja",
+    "worldMap": "Mapa świata",
+    "inventory": "Ekwipunek",
+    "options": "Opcje",
+    "logout": "Wyloguj",
+    "sessionDuration": "Czas od zalogowania",
+    "totalPlaytime": "Całkowity czas gry",
     "paletteLabel": "Motyw",
     "paletteArcane": "Arkana",
     "paletteForest": "Szmaragdowy las",
@@ -26,5 +32,6 @@
     "registerPasswordPlaceholder": "Utwórz hasło",
     "passwordConfirmationLabel": "Powtórz hasło",
     "passwordConfirmationPlaceholder": "Wpisz ponownie hasło",
-    "registerSubmit": "Utwórz konto"
+    "registerSubmit": "Utwórz konto",
+    "requiredField": "To pole jest wymagane"
 }

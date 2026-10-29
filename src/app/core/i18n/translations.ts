@@ -13,6 +13,12 @@ export interface Translations {
     intro: string;
     loginTab: string;
     registerTab: string;
+    worldMap: string;
+    inventory: string;
+    options: string;
+    logout: string;
+    sessionDuration: string;
+    totalPlaytime: string;
     paletteLabel: string;
     paletteArcane: string;
     paletteForest: string;
@@ -33,6 +39,7 @@ export interface Translations {
     passwordConfirmationLabel: string;
     passwordConfirmationPlaceholder: string;
     registerSubmit: string;
+    requiredField: string;
 }
 
 export const TRANSLATIONS: Record<Language, Translations> = { pl, uk, en };

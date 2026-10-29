@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { Guest } from './features/layout/guest/guest'
+import { GuestLayout } from './features/layout/guest-layout/guest-layout'
 import { MainLayout } from './features/layout/main-layout/main-layout'
 import { authGuard } from './core/guards/auth/auth-guard'
 import { anonymousGuard } from './core/guards/anonymous/anonymous-guard'
@@ -8,7 +8,7 @@ export const routes: Routes = [
     // Anonymous user zone
     {
         path: '',
-        component: Guest,
+        component: GuestLayout,
         canActivate: [anonymousGuard],
         children: [
             { path: 'login', loadComponent: () => import('./features/auth/login/login').then(m => m.Login) },

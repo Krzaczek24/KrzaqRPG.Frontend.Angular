@@ -7,6 +7,12 @@
     "intro": "Увійди або зареєструйся, щоб продовжити.",
     "loginTab": "Вхід",
     "registerTab": "Реєстрація",
+    "worldMap": "Мапа світу",
+    "inventory": "Інвентар",
+    "options": "Налаштування",
+    "logout": "Вийти",
+    "sessionDuration": "Час від входу",
+    "totalPlaytime": "Загальний час гри",
     "paletteLabel": "Тема",
     "paletteArcane": "Аркана",
     "paletteForest": "Смарагдовий ліс",
@@ -26,5 +32,6 @@
     "registerPasswordPlaceholder": "Створи пароль",
     "passwordConfirmationLabel": "Повтори пароль",
     "passwordConfirmationPlaceholder": "Введи пароль ще раз",
-    "registerSubmit": "Створити обліковий запис"
+    "registerSubmit": "Створити обліковий запис",
+    "requiredField": "Це поле обов’язкове"
 }

@@ -16,7 +16,9 @@
         radial-gradient(ellipse at 50% 0%, var(--color-glow), transparent 42%),
         var(--color-background);
     isolation: isolate;
-    transition: background-color 180ms ease, color 180ms ease;
+    transition:
+        background-color 180ms ease,
+        color 180ms ease;
 }
 
 .auth-panel {
@@ -25,7 +27,9 @@
     border: 1px solid var(--color-border);
     border-radius: 20px;
     background: var(--color-surface);
-    box-shadow: 0 28px 80px rgb(0 0 0 / 32%), 0 0 80px var(--color-glow);
+    box-shadow:
+        0 28px 80px rgb(0 0 0 / 32%),
+        0 0 80px var(--color-glow);
     user-select: none;
 }
 
@@ -42,6 +46,7 @@
     gap: 12px;
     padding: clamp(20px, 5vw, 25px) clamp(22px, 7vw, 32px);
     border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-mid);
 }
 
 .brand__identity {
@@ -61,8 +66,8 @@
     border-radius: 13px;
     color: var(--color-accent);
     background: var(--color-surface-raised);
-    font-family: Georgia, serif;
-    font-size: 25px;
+    font-family: inherit;
+    font-size: 1.482143rem;
     font-weight: 700;
 }
 
@@ -74,7 +79,7 @@
 }
 
 .brand__name {
-    font-size: 14px;
+    font-size: 0.892857rem;
     font-weight: 800;
     letter-spacing: 0.16em;
 }
@@ -86,7 +91,7 @@
 .brand__tagline {
     margin-top: 4px;
     color: var(--color-muted);
-    font-size: 12px;
+    font-size: 0.785714rem;
 }
 
 .panel-content {
@@ -99,7 +104,7 @@
 
 .eyebrow {
     color: var(--color-accent);
-    font-size: 11px;
+    font-size: 0.732143rem;
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -107,8 +112,8 @@
 
 h1 {
     margin: 9px 0 8px;
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: clamp(25px, 6vw, 30px);
+    font-family: inherit;
+    font-size: clamp(1.482143rem, calc(6vw * var(--font-scale) + 0.142857rem), 1.75rem);
     font-weight: 600;
     letter-spacing: -0.035em;
     line-height: 1.2;
@@ -116,7 +121,7 @@ h1 {
 
 .intro {
     color: var(--color-muted);
-    font-size: 14px;
+    font-size: 0.892857rem;
     line-height: 1.6;
 }
 
@@ -136,11 +141,13 @@ h1 {
     border: 1px solid transparent;
     border-radius: 8px;
     color: var(--color-muted);
-    font-size: 13px;
+    font-size: 0.839286rem;
     font-weight: 650;
     text-align: center;
     text-decoration: none;
-    transition: color 160ms ease, background-color 160ms ease;
+    transition:
+        color 160ms ease,
+        background-color 160ms ease;
 }
 
 .auth-tabs a:hover {
@@ -148,8 +155,9 @@ h1 {
 }
 
 .auth-tabs .auth-tabs__link--active {
-    color: var(--color-accent-contrast);
-    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: var(--color-surface);
 }
 
 .auth-content {
@@ -157,81 +165,9 @@ h1 {
     margin-top: 22px;
 }
 
-.palette-picker__options {
-    display: flex;
-    gap: 4px;
-}
-
-.palette-option {
-    position: relative;
-    display: grid;
-    width: 24px;
-    height: 24px;
-    place-items: center;
-    padding: 0;
-    border: 1px solid transparent;
-    border-radius: 50%;
-    background: transparent;
-    cursor: pointer;
-}
-
-.palette-option::before {
-    width: 16px;
-    height: 16px;
-    border: 2px solid var(--swatch-border);
-    border-radius: 50%;
-    background: var(--swatch-fill);
-    content: '';
-}
-
-.palette-option[aria-pressed='true'] {
-    border-color: var(--color-text);
-}
-
-.palette-option:focus-visible,
 .auth-tabs a:focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 3px;
-}
-
-.palette-option--arcane {
-    --swatch-border: #393249;
-    --swatch-fill: #100e1a;
-}
-
-.palette-option--forest {
-    --swatch-border: #2b4940;
-    --swatch-fill: #0c1715;
-}
-
-.palette-option--ember {
-    --swatch-border: #59252d;
-    --swatch-fill: #16090b;
-}
-
-.palette-option--ocean {
-    --swatch-border: #2d4559;
-    --swatch-fill: #0c141c;
-}
-
-.palette-option--royal {
-    --swatch-border: #755f32;
-    --swatch-fill: #050a19;
-}
-
-.palette-option--tavern {
-    --swatch-border: #745a2e;
-    --swatch-fill: #0c0805;
-}
-
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    clip-path: inset(50%);
 }
 
 .panel-footer {
@@ -241,5 +177,6 @@ h1 {
     padding: clamp(14px, 4vw, 15px) clamp(22px, 7vw, 32px);
     border-top: 1px solid var(--color-border);
     color: var(--color-muted);
-    font-size: 11px;
+    background: var(--color-surface-mid);
+    font-size: 0.732143rem;
 }
