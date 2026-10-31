@@ -14,6 +14,10 @@ export interface Translations {
     loginTab: string;
     registerTab: string;
     worldMap: string;
+    mapControls: string;
+    zoomIn: string;
+    zoomOut: string;
+    resetMapView: string;
     inventory: string;
     options: string;
     logout: string;

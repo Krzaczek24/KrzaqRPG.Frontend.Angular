@@ -1,1 +1,67 @@
-<p>world-map works!</p>
+<section class="world-map-page">
+    <h1 class="world-map-page__heading">{{ i18n.text.worldMap }}</h1>
+    <div class="world-map-page__frame">
+        <div
+            class="world-map__viewport"
+            [class.world-map__viewport--draggable]="zoom > 1"
+            [class.world-map__viewport--dragging]="isDragging"
+            [attr.aria-label]="i18n.text.worldMap"
+            role="region"
+            (wheel)="onWheel($event)"
+            (pointerdown)="startDragging($event)"
+            (pointermove)="drag($event)"
+            (pointerup)="stopDragging()"
+            (pointercancel)="stopDragging()"
+            (lostpointercapture)="stopDragging()"
+        >
+            <div class="world-map__surface" [style.transform]="mapTransform">
+                <img
+                    class="world-map__image"
+                    src="/assets/world-map.jpg"
+                    [alt]="i18n.text.worldMap"
+                    draggable="false"
+                />
+                <div class="world-map__overlay" aria-hidden="true"></div>
+            </div>
+        </div>
+        <div class="world-map__controls" [attr.aria-label]="i18n.text.mapControls">
+            <button
+                class="world-map__button"
+                type="button"
+                [attr.aria-label]="i18n.text.zoomOut"
+                [title]="i18n.text.zoomOut"
+                [disabled]="zoom <= 1"
+                (click)="zoomOut()"
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 12h14" />
+                </svg>
+            </button>
+            <output class="world-map__zoom" aria-live="polite">{{ zoom * 100 }}%</output>
+            <button
+                class="world-map__button"
+                type="button"
+                [attr.aria-label]="i18n.text.zoomIn"
+                [title]="i18n.text.zoomIn"
+                [disabled]="zoom >= 3"
+                (click)="zoomIn()"
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" />
+                </svg>
+            </button>
+            <button
+                class="world-map__button world-map__button--reset"
+                type="button"
+                [attr.aria-label]="i18n.text.resetMapView"
+                [title]="i18n.text.resetMapView"
+                [disabled]="zoom === 1"
+                (click)="resetView()"
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 11a8 8 0 1 1 2.3 5.7M4 5v6h6" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</section>
