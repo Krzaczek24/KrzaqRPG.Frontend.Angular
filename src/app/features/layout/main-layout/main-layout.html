@@ -58,32 +58,131 @@
         <router-outlet></router-outlet>
     </main>
 
-    <aside class="main-layout__side" aria-label="Prawy panel">
-        <a
-            class="main-layout__control main-layout__nav-link"
-            routerLink="/world-map"
-            routerLinkActive="main-layout__nav-link--active"
-            [routerLinkActiveOptions]="{ exact: true }"
-            ariaCurrentWhenActive="page"
-            >{{ i18n.text.worldMap }}</a
+    @if (isWorldMapRoute) {
+        <aside
+            class="main-layout__side main-layout__side--right"
+            [attr.aria-label]="i18n.text.travelPanel"
         >
-        <a
-            class="main-layout__control main-layout__nav-link"
-            routerLink="/inventory"
-            routerLinkActive="main-layout__nav-link--active"
-            [routerLinkActiveOptions]="{ exact: true }"
-            ariaCurrentWhenActive="page"
-            >{{ i18n.text.inventory }}</a
-        >
-        <a
-            class="main-layout__control main-layout__nav-link"
-            routerLink="/options"
-            routerLinkActive="main-layout__nav-link--active"
-            [routerLinkActiveOptions]="{ exact: true }"
-            ariaCurrentWhenActive="page"
-            >{{ i18n.text.options }}</a
-        >
-    </aside>
+            <section class="main-layout__location" aria-labelledby="current-area-heading">
+                <h2 class="main-layout__section-heading" id="current-area-heading">
+                    {{ i18n.text.currentArea }}
+                </h2>
+                @if (worldMapData.currentArea(); as area) {
+                    <p class="main-layout__area-name">{{ area.name }}</p>
+                } @else {
+                    <p class="main-layout__empty">{{ i18n.text.currentAreaUnavailable }}</p>
+                }
+            </section>
+
+            <section class="main-layout__selected" aria-labelledby="selected-paths-heading">
+                <h2 class="main-layout__section-heading" id="selected-paths-heading">
+                    {{ i18n.text.selectedPaths }}
+                </h2>
+                @if (worldMapData.selectedPaths().length > 0) {
+                    <ul class="main-layout__travel-list main-layout__travel-list--selected">
+                        @for (area of worldMapData.selectedPaths(); track $index; let index = $index) {
+                            <li>
+                                <span class="main-layout__selected-name">{{ area.name }}</span>
+                                @let travelTime =
+                                    worldMapData.selectedPathTravelTimeFor(index);
+                                @if (travelTime !== undefined) {
+                                    <span class="main-layout__travel-time">
+                                        @if (travelTime === null) {
+                                            {{ i18n.text.travelTimeUnavailable }}
+                                        } @else {
+                                            + {{ travelTime }}
+                                        }
+                                    </span>
+                                }
+                                <button
+                                    class="main-layout__remove-path"
+                                    type="button"
+                                    [attr.aria-label]="i18n.text.removeSelectedPath + ': ' + area.name"
+                                    [title]="i18n.text.removeSelectedPath"
+                                    (click)="worldMapData.removeSelectedPath(index)"
+                                >
+                                    <svg viewBox="0 0 16 16" aria-hidden="true">
+                                        <path d="m4 4 8 8m0-8-8 8" />
+                                    </svg>
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                } @else {
+                    <p class="main-layout__empty">{{ i18n.text.noSelectedPaths }}</p>
+                }
+            </section>
+
+            <section class="main-layout__travel" aria-labelledby="available-areas-heading">
+                <h2 class="main-layout__section-heading" id="available-areas-heading">
+                    {{ i18n.text.availableTravelAreas }}
+                </h2>
+                @if (worldMapData.availableDestinations().length > 0) {
+                    <ul class="main-layout__travel-list">
+                        @for (path of worldMapData.availableDestinations(); track path.id) {
+                            <li>
+                                <button
+                                    class="main-layout__travel-button"
+                                    type="button"
+                                    (click)="onTravelDestinationClick(path)"
+                                >
+                                    <span class="main-layout__travel-name">
+                                        {{ path.targetArea.name }}
+                                    </span>
+                                    @let travelTime =
+                                        worldMapData.travelTimeFor(path.targetArea.id);
+                                    @if (travelTime !== undefined) {
+                                        <span class="main-layout__travel-time">
+                                            @if (travelTime === null) {
+                                                {{ i18n.text.travelTimeUnavailable }}
+                                            } @else {
+                                                + {{ travelTime }}
+                                            }
+                                        </span>
+                                    }
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                } @else {
+                    <p class="main-layout__empty">{{ i18n.text.noAvailableTravelAreas }}</p>
+                }
+            </section>
+
+            <button
+                class="main-layout__begin-travel"
+                type="button"
+                [disabled]="
+                    worldMapData.selectedPathIds().length === 0 ||
+                    worldMapData.isBeginningTravel() ||
+                    worldMapData.travelStarted()
+                "
+                (click)="worldMapData.beginTravel()"
+            >
+                <span>
+                    @if (worldMapData.travelStarted()) {
+                        {{ i18n.text.travelStarted }}
+                    } @else if (worldMapData.isBeginningTravel()) {
+                        {{ i18n.text.beginningTravel }}
+                    } @else {
+                        {{ i18n.text.beginTravel }}
+                    }
+                </span>
+                @if (worldMapData.selectedPathIds().length > 0) {
+                    @let totalTime = worldMapData.selectedRouteTravelTime();
+                    @if (totalTime !== undefined) {
+                        <span class="main-layout__begin-travel-time">
+                            @if (totalTime === null) {
+                                {{ i18n.text.travelTimeUnavailable }}
+                            } @else {
+                                {{ totalTime }}
+                            }
+                        </span>
+                    }
+                }
+            </button>
+        </aside>
+    }
 
     <footer class="main-layout__bottom">
         <span class="main-layout__copyright">© 2026 Krzaq RPG</span>

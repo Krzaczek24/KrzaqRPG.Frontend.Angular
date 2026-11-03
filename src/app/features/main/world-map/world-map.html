@@ -6,7 +6,7 @@
                 class="world-map__button"
                 type="button"
                 [attr.aria-label]="i18n.text.zoomOut"
-                [title]="i18n.text.zoomOut"
+                [attr.data-tooltip]="i18n.text.zoomOut"
                 [disabled]="zoom <= minZoom"
                 (click)="zoomOut()"
             >
@@ -18,7 +18,7 @@
                 class="world-map__button"
                 type="button"
                 [attr.aria-label]="i18n.text.zoomIn"
-                [title]="i18n.text.zoomIn"
+                [attr.data-tooltip]="i18n.text.zoomIn"
                 [disabled]="zoom >= 3"
                 (click)="zoomIn()"
             >
@@ -30,7 +30,7 @@
                 class="world-map__button world-map__button--reset"
                 type="button"
                 [attr.aria-label]="i18n.text.resetMapView"
-                [title]="i18n.text.resetMapView"
+                [attr.data-tooltip]="i18n.text.resetMapView"
                 [disabled]="zoom === 1"
                 (click)="resetView()"
             >
@@ -62,7 +62,44 @@
                         [alt]="i18n.text.worldMap"
                         draggable="false"
                     />
-                    <div class="world-map__overlay" aria-hidden="true"></div>
+                    <div class="world-map__overlay">
+                        @if (playerPosition; as player) {
+                            <div
+                                class="world-map__player"
+                                [style.left.%]="player.x"
+                                [style.top.%]="player.y"
+                                [attr.aria-label]="player.name"
+                                [title]="player.name"
+                                role="img"
+                            >
+                                <span class="world-map__player-marker" aria-hidden="true"></span>
+                            </div>
+                        }
+                        @for (position of positionedAreas; track position.area.id) {
+                            <button
+                                class="world-map__area"
+                                [class.world-map__area--city]="
+                                    getAreaMarkerClass(position.area) === 'world-map__area--city'
+                                "
+                                [class.world-map__area--medium]="
+                                    getAreaMarkerClass(position.area) === 'world-map__area--medium'
+                                "
+                                [class.world-map__area--small]="
+                                    getAreaMarkerClass(position.area) === 'world-map__area--small'
+                                "
+                                [class.world-map__area--available]="
+                                    worldMapData.isAreaReachable(position.area.id)
+                                "
+                                type="button"
+                                [style.left.%]="position.x"
+                                [style.top.%]="position.y"
+                                [attr.aria-label]="position.area.name"
+                                [title]="position.area.name"
+                                (pointerdown)="$event.stopPropagation()"
+                                (click)="onAreaClick(position.area)"
+                            ></button>
+                        }
+                    </div>
                 </div>
             </div>
         </div>

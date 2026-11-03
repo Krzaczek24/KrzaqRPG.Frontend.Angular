@@ -5,6 +5,8 @@ import { interval } from 'rxjs';
 import { AuthSessionService, formatDuration } from '../../../core/auth-session';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { ThemeService } from '../../../core/theme';
+import { WorldMapDataService } from '../../main/world-map/world-map-data.service';
+import { AvailablePathDto } from '../../../core/api/api-client';
 
 @Component({
     imports: [RouterLink, RouterLinkActive, RouterOutlet],
@@ -17,6 +19,7 @@ export class MainLayout {
     private readonly destroyRef = inject(DestroyRef);
     public readonly i18n = inject(I18nService);
     public readonly theme = inject(ThemeService);
+    public readonly worldMapData = inject(WorldMapDataService);
     private readonly authSession = inject(AuthSessionService);
     public readonly clockTime = signal(this.formatTime(new Date()));
     public readonly sessionDuration = signal(
@@ -26,8 +29,18 @@ export class MainLayout {
         formatDuration(this.authSession.getTotalPlaytimeSeconds()),
     );
 
+    public get isWorldMapRoute(): boolean {
+        return this.router.isActive('/world-map', {
+            paths: 'exact',
+            queryParams: 'ignored',
+            fragment: 'ignored',
+            matrixParams: 'ignored',
+        });
+    }
+
     constructor() {
         this.authSession.ensureStartedAt();
+        this.worldMapData.load();
 
         interval(1000)
             .pipe(takeUntilDestroyed(this.destroyRef))
@@ -56,5 +69,9 @@ export class MainLayout {
         localStorage.removeItem('auth_token');
         this.authSession.finish();
         this.router.navigate(['/']);
+    }
+
+    public onTravelDestinationClick(path: AvailablePathDto): void {
+        this.worldMapData.selectArea(path.targetArea);
     }
 }
