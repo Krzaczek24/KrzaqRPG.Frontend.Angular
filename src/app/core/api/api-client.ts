@@ -1282,6 +1282,7 @@ export interface IAddTravelEventCommandResult {
 export class AreaDto implements IAreaDto {
     id!: number;
     name!: string;
+    coordinates!: Coordinates;
 
     [key: string]: any;
 
@@ -1291,6 +1292,9 @@ export class AreaDto implements IAreaDto {
                 if (data.hasOwnProperty(property))
                     (this as any)[property] = (data as any)[property];
             }
+        }
+        if (!data) {
+            this.coordinates = new Coordinates();
         }
     }
 
@@ -1302,6 +1306,7 @@ export class AreaDto implements IAreaDto {
             }
             this.id = _data["id"];
             this.name = _data["name"];
+            this.coordinates = _data["coordinates"] ? Coordinates.fromJS(_data["coordinates"]) : new Coordinates();
         }
     }
 
@@ -1320,6 +1325,7 @@ export class AreaDto implements IAreaDto {
         }
         data["id"] = this.id;
         data["name"] = this.name;
+        data["coordinates"] = this.coordinates ? this.coordinates.toJSON() : undefined as any;
         return data;
     }
 }
@@ -1327,6 +1333,7 @@ export class AreaDto implements IAreaDto {
 export interface IAreaDto {
     id: number;
     name: string;
+    coordinates: Coordinates;
 
     [key: string]: any;
 }
@@ -1549,6 +1556,58 @@ export class BeginTravelCommandResult implements IBeginTravelCommandResult {
 
 export interface IBeginTravelCommandResult {
     id: number;
+
+    [key: string]: any;
+}
+
+export class Coordinates implements ICoordinates {
+    x?: number;
+    y?: number;
+
+    [key: string]: any;
+
+    constructor(data?: ICoordinates) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.x = _data["x"];
+            this.y = _data["y"];
+        }
+    }
+
+    static fromJS(data: any): Coordinates {
+        data = typeof data === 'object' ? data : {};
+        let result = new Coordinates();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["x"] = this.x;
+        data["y"] = this.y;
+        return data;
+    }
+}
+
+export interface ICoordinates {
+    x?: number;
+    y?: number;
 
     [key: string]: any;
 }

@@ -93,6 +93,84 @@
     pointer-events: none;
 }
 
+.world-map__player {
+    position: absolute;
+    z-index: 1;
+    width: 30px;
+    height: 30px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: color-mix(in srgb, #39d98a 35%, transparent);
+    box-shadow:
+        0 0 10px 4px color-mix(in srgb, #39d98a 80%, transparent),
+        0 0 26px 10px color-mix(in srgb, #39d98a 45%, transparent);
+    transform: translate(-50%, -50%);
+}
+
+.world-map__player-marker {
+    position: absolute;
+    inset: 7px;
+    border-radius: 50%;
+    background: #39d98a;
+    box-shadow: 0 0 8px 2px #39d98a;
+}
+
+.world-map__area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: 0 0 0 0 transparent;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: auto;
+    transform: translate(-50%, -50%);
+    transition:
+        opacity 140ms ease,
+        background-color 140ms ease,
+        border-color 140ms ease,
+        box-shadow 140ms ease;
+}
+
+.world-map__area--medium {
+    width: 54px;
+    height: 54px;
+}
+
+.world-map__area--city {
+    width: 90px;
+    height: 90px;
+}
+
+.world-map__area--available {
+    border-color: color-mix(in srgb, var(--color-accent) 70%, #fff);
+    background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+    box-shadow:
+        0 0 10px 3px color-mix(in srgb, var(--color-accent) 55%, transparent),
+        0 0 22px 8px color-mix(in srgb, var(--color-accent) 30%, transparent);
+    opacity: 0.8;
+}
+
+.world-map__area:hover,
+.world-map__area:focus-visible {
+    border-color: color-mix(in srgb, var(--color-accent) 75%, #fff);
+    background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+    box-shadow:
+        0 0 12px 4px color-mix(in srgb, var(--color-accent) 65%, transparent),
+        0 0 28px 10px color-mix(in srgb, var(--color-accent) 35%, transparent);
+    opacity: 1;
+}
+
+.world-map__area:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--color-accent) 75%, #fff);
+    outline-offset: 3px;
+}
+
 .world-map__controls {
     display: flex;
     align-items: center;
@@ -106,6 +184,7 @@
 }
 
 .world-map__button {
+    position: relative;
     display: grid;
     width: 36px;
     height: 36px;
@@ -121,6 +200,37 @@
 .world-map__button:hover:not(:disabled) {
     border-color: var(--color-accent);
     color: var(--color-accent);
+}
+
+.world-map__button::after {
+    position: absolute;
+    right: 50%;
+    bottom: calc(100% + 8px);
+    width: max-content;
+    padding: 6px 9px;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    color: var(--color-text);
+    background: var(--color-surface-raised);
+    box-shadow: 0 6px 18px rgb(0 0 0 / 28%);
+    content: attr(data-tooltip);
+    font-family: var(--app-font-family);
+    font-size: 0.785714rem;
+    font-weight: 400;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(50%, 4px);
+    transition:
+        opacity 140ms ease,
+        transform 140ms ease;
+    visibility: hidden;
+    z-index: 1;
+}
+
+.world-map__button:is(:hover, :focus-visible)::after {
+    opacity: 1;
+    transform: translate(50%, 0);
+    visibility: visible;
 }
 
 .world-map__button:focus-visible {
