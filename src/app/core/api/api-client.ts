@@ -1283,7 +1283,6 @@ export class AreaDto implements IAreaDto {
     id!: number;
     name!: string;
     coordinates!: Coordinates;
-    type?: string;
 
     [key: string]: any;
 
@@ -1308,7 +1307,6 @@ export class AreaDto implements IAreaDto {
             this.id = _data["id"];
             this.name = _data["name"];
             this.coordinates = _data["coordinates"] ? Coordinates.fromJS(_data["coordinates"]) : new Coordinates();
-            this.type = _data["type"];
         }
     }
 
@@ -1328,7 +1326,6 @@ export class AreaDto implements IAreaDto {
         data["id"] = this.id;
         data["name"] = this.name;
         data["coordinates"] = this.coordinates ? this.coordinates.toJSON() : undefined as any;
-        data["type"] = this.type;
         return data;
     }
 }
@@ -1337,7 +1334,6 @@ export interface IAreaDto {
     id: number;
     name: string;
     coordinates: Coordinates;
-    type?: string;
 
     [key: string]: any;
 }
@@ -1880,7 +1876,7 @@ export interface IGetAreaAvailablePathsQueryResult {
 }
 
 export class GetCharacterDetailsLocationDto implements IGetCharacterDetailsLocationDto {
-    type!: number | string;
+    type!: number;
     id!: number;
     name!: string;
 
@@ -1928,7 +1924,7 @@ export class GetCharacterDetailsLocationDto implements IGetCharacterDetailsLocat
 }
 
 export interface IGetCharacterDetailsLocationDto {
-    type: number | string;
+    type: number;
     id: number;
     name: string;
 
