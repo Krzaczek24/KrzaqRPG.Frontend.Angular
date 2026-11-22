@@ -54,7 +54,10 @@
         >
     </aside>
 
-    <main class="main-layout__content">
+    <main
+        class="main-layout__content"
+        [class.main-layout__content--world-map]="isWorldMapRoute"
+    >
         <router-outlet></router-outlet>
     </main>
 

@@ -8,6 +8,8 @@ const INITIAL_ZOOM = 1;
 const MAX_ZOOM = 3;
 const ZOOM_STEP = 0.25;
 const MAX_MAP_COORDINATE = 2000;
+const ROUTE_START_COLOR = [118, 80, 51] as const;
+const ROUTE_END_COLOR = [223, 183, 131] as const;
 
 @Component({
     imports: [],
@@ -31,38 +33,173 @@ export class WorldMap {
 
     public get positionedAreas(): { area: AreaDto; x: number; y: number }[] {
         return this.worldMapData.areas().flatMap((area) => {
-            const x = area.coordinates?.x;
-            const y = area.coordinates?.y;
-            if (
-                typeof x === 'number' &&
-                Number.isFinite(x) &&
-                x >= 0 &&
-                x <= MAX_MAP_COORDINATE &&
-                typeof y === 'number' &&
-                Number.isFinite(y) &&
-                y >= 0 &&
-                y <= MAX_MAP_COORDINATE
-            ) {
-                return [
-                    {
-                        area,
-                        x: (x * 100) / MAX_MAP_COORDINATE,
-                        y: (y * 100) / MAX_MAP_COORDINATE,
-                    },
-                ];
-            }
-
-            return [];
+            const position = this.getAreaPosition(area);
+            return position ? [{ area, ...position }] : [];
         });
     }
 
     public get playerPosition(): { x: number; y: number; name: string } | null {
-        const area = this.worldMapData.currentArea();
         const character = this.worldMapData.character();
-        if (!area || !character) {
+        const area =
+            this.worldMapData.selectedPaths().at(-1) ?? this.worldMapData.currentArea();
+        const position = area ? this.getAreaPosition(area) : null;
+        if (!position || !character) {
             return null;
         }
 
+        return {
+            ...position,
+            name: character.name,
+        };
+    }
+
+    public get routePath(): {
+        d: string;
+        segments: {
+            id: number;
+            d: string;
+            start: { x: number; y: number };
+            end: { x: number; y: number };
+            startColor: string;
+            endColor: string;
+        }[];
+    } | null {
+        const route = [this.worldMapData.currentArea(), ...this.worldMapData.selectedPaths()]
+            .flatMap((area) => {
+                const position = area ? this.getAreaPosition(area) : null;
+                return position ? [position] : [];
+            })
+            .filter(
+                (point, index, points) =>
+                    index === 0 ||
+                    point.x !== points[index - 1].x ||
+                    point.y !== points[index - 1].y,
+            );
+
+        if (route.length < 2) {
+            return null;
+        }
+
+        const corners = route.slice(1, -1).map((corner, index) => {
+            const previous = route[index];
+            const next = route[index + 2];
+            const incomingLength = Math.hypot(corner.x - previous.x, corner.y - previous.y);
+            const outgoingLength = Math.hypot(next.x - corner.x, next.y - corner.y);
+            const radius = Math.min(3.5, incomingLength / 2, outgoingLength / 2);
+            const before = {
+                x: corner.x + ((previous.x - corner.x) * radius) / incomingLength,
+                y: corner.y + ((previous.y - corner.y) * radius) / incomingLength,
+            };
+            const after = {
+                x: corner.x + ((next.x - corner.x) * radius) / outgoingLength,
+                y: corner.y + ((next.y - corner.y) * radius) / outgoingLength,
+            };
+
+            return {
+                before,
+                after,
+                middle: {
+                    x: (before.x + 2 * corner.x + after.x) / 4,
+                    y: (before.y + 2 * corner.y + after.y) / 4,
+                },
+                leftControl: {
+                    x: (before.x + corner.x) / 2,
+                    y: (before.y + corner.y) / 2,
+                },
+                rightControl: {
+                    x: (corner.x + after.x) / 2,
+                    y: (corner.y + after.y) / 2,
+                },
+            };
+        });
+
+        let path = `M ${route[0].x},${route[0].y}`;
+        for (const [index, corner] of corners.entries()) {
+            const point = route[index + 1];
+            path += ` L ${corner.before.x},${corner.before.y} Q ${point.x},${point.y} ${corner.after.x},${corner.after.y}`;
+        }
+
+        const last = route.at(-1)!;
+        const segments = route.slice(1).map((_, index) => {
+            const previousCorner = index > 0 ? corners[index - 1] : null;
+            const nextCorner = index < corners.length ? corners[index] : null;
+            const start = previousCorner?.middle ?? route[index];
+            const end = nextCorner?.middle ?? last;
+            let segmentPath = `M ${start.x},${start.y}`;
+            let length = 0;
+
+            if (previousCorner) {
+                segmentPath += ` Q ${previousCorner.rightControl.x},${previousCorner.rightControl.y} ${previousCorner.after.x},${previousCorner.after.y}`;
+                length += this.quadraticLength(
+                    previousCorner.middle,
+                    previousCorner.rightControl,
+                    previousCorner.after,
+                );
+            }
+
+            const lineStart = previousCorner?.after ?? route[index];
+            const lineEnd = nextCorner?.before ?? route[index + 1];
+            segmentPath += ` L ${lineEnd.x},${lineEnd.y}`;
+            length += this.routeDistance(lineStart, lineEnd);
+
+            if (nextCorner) {
+                segmentPath += ` Q ${nextCorner.leftControl.x},${nextCorner.leftControl.y} ${nextCorner.middle.x},${nextCorner.middle.y}`;
+                length += this.quadraticLength(
+                    nextCorner.before,
+                    nextCorner.leftControl,
+                    nextCorner.middle,
+                );
+            }
+
+            return { id: index, d: segmentPath, start, end, length };
+        });
+        const totalLength = segments.reduce((total, segment) => total + segment.length, 0);
+        if (totalLength === 0) {
+            return null;
+        }
+        let traveledLength = 0;
+        const coloredSegments = segments.map((segment) => {
+            const startColor = this.routeColor(traveledLength / totalLength);
+            traveledLength += segment.length;
+            const endColor = this.routeColor(traveledLength / totalLength);
+            return {
+                id: segment.id,
+                d: segment.d,
+                start: segment.start,
+                end: segment.end,
+                startColor,
+                endColor,
+            };
+        });
+
+        return {
+            d: `${path} L ${last.x},${last.y}`,
+            segments: coloredSegments,
+        };
+    }
+
+    public getAreaMarkerClass(area: AreaDto): string {
+        switch (area.type?.toUpperCase()) {
+            case 'CITY':
+                return 'world-map__area--extra-large';
+            case 'TOWN':
+            case 'TAVERN':
+            case 'VILLAGE':
+                return 'world-map__area--large';
+            case 'ENCAMPMENT':
+            case 'RUINS':
+            case 'MINES':
+                return 'world-map__area--medium';
+            default:
+                return 'world-map__area--small';
+        }
+    }
+
+    public onAreaClick(_area: AreaDto): void {
+        this.worldMapData.selectArea(_area);
+    }
+
+    private getAreaPosition(area: AreaDto): { x: number; y: number } | null {
         const x = area.coordinates?.x;
         const y = area.coordinates?.y;
         if (
@@ -81,24 +218,42 @@ export class WorldMap {
         return {
             x: (x * 100) / MAX_MAP_COORDINATE,
             y: (y * 100) / MAX_MAP_COORDINATE,
-            name: character.name,
         };
     }
 
-    public getAreaMarkerClass(area: AreaDto): string {
-        switch (area.type?.toUpperCase()) {
-            case 'CITY':
-                return 'world-map__area--city';
-            case 'TOWN':
-            case 'TAVERN':
-                return 'world-map__area--medium';
-            default:
-                return 'world-map__area--small';
-        }
+    private routeColor(progress: number): string {
+        const channels = ROUTE_START_COLOR.map((start, index) =>
+            Math.round(start + (ROUTE_END_COLOR[index] - start) * progress)
+                .toString(16)
+                .padStart(2, '0'),
+        );
+        return `#${channels.join('')}`;
     }
 
-    public onAreaClick(_area: AreaDto): void {
-        this.worldMapData.selectArea(_area);
+    private routeDistance(start: { x: number; y: number }, end: { x: number; y: number }): number {
+        return Math.hypot(((end.x - start.x) * 4) / 3, end.y - start.y);
+    }
+
+    private quadraticLength(
+        start: { x: number; y: number },
+        control: { x: number; y: number },
+        end: { x: number; y: number },
+    ): number {
+        const steps = 12;
+        let length = 0;
+        let previous = start;
+
+        for (let step = 1; step <= steps; step++) {
+            const t = step / steps;
+            const point = {
+                x: (1 - t) ** 2 * start.x + 2 * (1 - t) * t * control.x + t ** 2 * end.x,
+                y: (1 - t) ** 2 * start.y + 2 * (1 - t) * t * control.y + t ** 2 * end.y,
+            };
+            length += this.routeDistance(previous, point);
+            previous = point;
+        }
+
+        return length;
     }
 
     public get canPan(): boolean {

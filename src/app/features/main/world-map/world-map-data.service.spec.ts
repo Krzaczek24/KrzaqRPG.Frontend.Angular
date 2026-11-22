@@ -139,4 +139,33 @@ describe('WorldMapDataService', () => {
         expect(service.selectedPaths().map((area) => area.id)).toEqual([2, 3]);
     });
 
+    it('removes the last route segment when selecting the current planned area', () => {
+        service.selectArea(areas[1]);
+        service.selectArea(areas[2]);
+
+        service.selectArea(areas[2]);
+
+        expect(service.selectedPaths().map((area) => area.id)).toEqual([2]);
+        expect(service.availablePaths().map((path) => path.targetArea.id)).toEqual([3, 1]);
+    });
+
+    it('keeps the route unchanged when clicking the starting area with no selected paths', () => {
+        service.selectArea(areas[0]);
+
+        expect(service.selectedPaths()).toEqual([]);
+    });
+
+    it('uses the full map area when selecting a destination with only its id and name', () => {
+        const areasWithCoordinates = [
+            AreaDto.fromJS({ id: 1, name: 'Starting area', coordinates: { x: 100, y: 200 } }),
+            AreaDto.fromJS({ id: 2, name: 'Second area', coordinates: { x: 300, y: 400 } }),
+            AreaDto.fromJS({ id: 3, name: 'Third area', coordinates: { x: 500, y: 600 } }),
+        ];
+        service.areas.set(areasWithCoordinates);
+
+        service.selectArea(pathsByArea.get(1)![0].targetArea);
+
+        expect(service.selectedPaths()[0].coordinates).toEqual({ x: 300, y: 400 });
+    });
+
 });

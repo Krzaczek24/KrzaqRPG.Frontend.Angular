@@ -91,6 +91,8 @@
 }
 
 .main-layout__side--right {
+    position: relative;
+    z-index: 2;
     gap: 18px;
     min-height: 0;
     overflow: hidden;
@@ -330,6 +332,12 @@
     background: var(--color-surface);
     overflow-x: hidden;
     overflow-y: auto;
+}
+
+.main-layout__content--world-map {
+    position: relative;
+    z-index: 1;
+    overflow: visible;
 }
 
 .main-layout__bottom {

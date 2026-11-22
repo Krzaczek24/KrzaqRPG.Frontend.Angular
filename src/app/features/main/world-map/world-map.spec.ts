@@ -105,6 +105,16 @@ describe('WorldMap', () => {
         expect(abandonedMines.classList.contains('world-map__area--small')).toBe(true);
         expect(abandonedMines.style.left).toBe('14%');
         expect(abandonedMines.style.top).toBe('7%');
+        expect(abandonedMines.getAttribute('data-tooltip')).toBe('Abandoned Mines');
+        expect(abandonedMines.hasAttribute('title')).toBe(false);
+    });
+
+    it('places tooltips below map areas near the upper edge', () => {
+        const marker = fixture.nativeElement.querySelector(
+            '.world-map__area[aria-label="Abandoned Mines"]',
+        );
+
+        expect(marker.classList.contains('world-map__area--tooltip-below')).toBe(true);
     });
 
     it('loads character 1 and renders the player marker at their area location', () => {
@@ -115,6 +125,34 @@ describe('WorldMap', () => {
         expect(marker.getAttribute('aria-label')).toBe('Krzaq');
         expect(marker.style.left).toBe('14%');
         expect(marker.style.top).toBe('7%');
+    });
+
+    it('moves the player marker and draws the selected route from the current area', () => {
+        selectedPaths.set([
+            areas[2],
+            AreaDto.fromJS({ id: 4, name: 'Final place', coordinates: { x: 700, y: 900 } }),
+        ]);
+        fixture.detectChanges();
+
+        const marker = fixture.nativeElement.querySelector('.world-map__player');
+        const route = fixture.nativeElement.querySelector('.world-map__route-outline');
+
+        expect(marker.style.left).toBe('35%');
+        expect(marker.style.top).toBe('45%');
+        expect(route.getAttribute('d')).toMatch(/^M 14,7 L /);
+        expect(route.getAttribute('d')).toContain(' Q 25,30 ');
+        expect(route.getAttribute('d')).toMatch(/L 35,45$/);
+        const gradients = fixture.nativeElement.querySelectorAll(
+            'linearGradient[id^="world-map-route-gradient-"]',
+        );
+        expect(gradients).toHaveLength(2);
+        const firstStops = gradients[0].querySelectorAll('stop');
+        const lastStops = gradients[1].querySelectorAll('stop');
+        expect(firstStops[0].getAttribute('stop-color')).toBe('#dfb783');
+        expect(firstStops[1].getAttribute('stop-color')).toBe(
+            lastStops[0].getAttribute('stop-color'),
+        );
+        expect(lastStops[1].getAttribute('stop-color')).toBe('#765033');
     });
 
     it('highlights areas that are available through a travel path', () => {
@@ -143,11 +181,11 @@ describe('WorldMap', () => {
 
     it('sizes marker hit areas according to their area type', () => {
         expect(component.getAreaMarkerClass(AreaDto.fromJS({ id: 3, name: 'Capital', type: 'CITY' })))
-            .toBe('world-map__area--city');
+            .toBe('world-map__area--extra-large');
         expect(component.getAreaMarkerClass(AreaDto.fromJS({ id: 4, name: 'Town', type: 'TOWN' })))
-            .toBe('world-map__area--medium');
+            .toBe('world-map__area--large');
         expect(component.getAreaMarkerClass(AreaDto.fromJS({ id: 5, name: 'Tavern', type: 'TAVERN' })))
-            .toBe('world-map__area--medium');
+            .toBe('world-map__area--large');
         expect(component.getAreaMarkerClass(AreaDto.fromJS({ id: 6, name: 'Cave', type: 'CAVE' })))
             .toBe('world-map__area--small');
     });

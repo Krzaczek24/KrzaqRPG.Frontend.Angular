@@ -63,6 +63,46 @@
                         draggable="false"
                     />
                     <div class="world-map__overlay">
+                        @if (routePath; as path) {
+                            <svg
+                                class="world-map__route"
+                                viewBox="0 0 100 100"
+                                preserveAspectRatio="none"
+                                aria-hidden="true"
+                            >
+                                <defs>
+                                    @for (segment of path.segments; track segment.id) {
+                                        <linearGradient
+                                            [attr.id]="'world-map-route-gradient-' + segment.id"
+                                            gradientUnits="userSpaceOnUse"
+                                            [attr.x1]="segment.start.x"
+                                            [attr.y1]="segment.start.y"
+                                            [attr.x2]="segment.end.x"
+                                            [attr.y2]="segment.end.y"
+                                        >
+                                            <stop
+                                                offset="0%"
+                                                [attr.stop-color]="segment.startColor"
+                                            />
+                                            <stop
+                                                offset="100%"
+                                                [attr.stop-color]="segment.endColor"
+                                            />
+                                        </linearGradient>
+                                    }
+                                </defs>
+                                <path class="world-map__route-outline" [attr.d]="path.d" />
+                                @for (segment of path.segments; track segment.id) {
+                                    <path
+                                        class="world-map__route-line"
+                                        [attr.d]="segment.d"
+                                        [style.stroke]="
+                                            'url(#world-map-route-gradient-' + segment.id + ')'
+                                        "
+                                    />
+                                }
+                            </svg>
+                        }
                         @if (playerPosition; as player) {
                             <div
                                 class="world-map__player"
@@ -78,8 +118,12 @@
                         @for (position of positionedAreas; track position.area.id) {
                             <button
                                 class="world-map__area"
-                                [class.world-map__area--city]="
-                                    getAreaMarkerClass(position.area) === 'world-map__area--city'
+                                [class.world-map__area--extra-large]="
+                                    getAreaMarkerClass(position.area) ===
+                                    'world-map__area--extra-large'
+                                "
+                                [class.world-map__area--large]="
+                                    getAreaMarkerClass(position.area) === 'world-map__area--large'
                                 "
                                 [class.world-map__area--medium]="
                                     getAreaMarkerClass(position.area) === 'world-map__area--medium'
@@ -87,6 +131,7 @@
                                 [class.world-map__area--small]="
                                     getAreaMarkerClass(position.area) === 'world-map__area--small'
                                 "
+                                [class.world-map__area--tooltip-below]="position.y <= 22"
                                 [class.world-map__area--available]="
                                     worldMapData.isAreaReachable(position.area.id)
                                 "
@@ -94,7 +139,7 @@
                                 [style.left.%]="position.x"
                                 [style.top.%]="position.y"
                                 [attr.aria-label]="position.area.name"
-                                [title]="position.area.name"
+                                [attr.data-tooltip]="position.area.name"
                                 (pointerdown)="$event.stopPropagation()"
                                 (click)="onAreaClick(position.area)"
                             ></button>

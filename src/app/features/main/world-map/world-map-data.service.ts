@@ -93,6 +93,12 @@ export class WorldMapDataService {
     }
 
     public selectArea(area: Pick<AreaDto, 'id' | 'name'>): void {
+        const selectedAreas = this.selectedPaths();
+        if (selectedAreas.at(-1)?.id === area.id) {
+            this.removeSelectedPath(selectedAreas.length - 1);
+            return;
+        }
+
         if (!this.canSelectArea(area.id)) {
             return;
         }
@@ -102,7 +108,11 @@ export class WorldMapDataService {
             return;
         }
 
-        this.selectedPaths.update((selectedAreas) => [...selectedAreas, AreaDto.fromJS(area)]);
+        const selectedArea = this.areas().find(({ id }) => id === area.id) ?? area;
+        this.selectedPaths.update((selectedAreas) => [
+            ...selectedAreas,
+            AreaDto.fromJS(selectedArea),
+        ]);
         this.selectedPathIds.update((pathIds) => [...pathIds, path.id]);
         this.selectedPathTravelTimes.update((times) => [
             ...times,
