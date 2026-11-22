@@ -104,22 +104,32 @@ describe('WorldMapDataService', () => {
     });
 
     it('prevents only an immediate return and allows revisiting older locations later', () => {
+        service.load();
+        expect(estimateTravel.mock.calls.map(([, pathIds]) => pathIds)).toEqual([[12]]);
+
         service.selectArea(areas[1]);
         expect(service.selectedPaths().map((area) => area.id)).toEqual([2]);
         expect(service.availableDestinations().map((path) => path.targetArea.id)).toEqual([3]);
         expect(estimateTravel).toHaveBeenCalledWith(1, [12]);
-        expect(estimateTravel).toHaveBeenLastCalledWith(1, [12, 23]);
+        expect(estimateTravel).toHaveBeenCalledWith(1, [23]);
+        expect(estimateTravel.mock.calls.map(([, pathIds]) => pathIds)).toEqual([[12], [23]]);
         expect(service.travelTimeFor(3)).toBe('1m 00s');
         expect(service.selectedPathTravelTimeFor(0)).toBe('1m 00s');
 
         service.selectArea(areas[2]);
         expect(service.selectedPaths().map((area) => area.id)).toEqual([2, 3]);
         expect(service.availableDestinations().map((path) => path.targetArea.id)).toEqual([1]);
-        expect(estimateTravel).toHaveBeenCalledWith(1, [12, 23]);
-        expect(estimateTravel).toHaveBeenLastCalledWith(1, [12, 23, 31]);
+        expect(estimateTravel).toHaveBeenCalledWith(1, [31]);
+        expect(estimateTravel.mock.calls.map(([, pathIds]) => pathIds)).toEqual([
+            [12],
+            [23],
+            [31],
+        ]);
+        expect(estimateTravel.mock.calls.every(([, pathIds]) => pathIds.length === 1)).toBe(true);
         expect(service.travelTimeFor(1)).toBe('1m 00s');
         expect(service.selectedPathTravelTimeFor(0)).toBe('1m 00s');
         expect(service.selectedPathTravelTimeFor(1)).toBe('1m 00s');
+        expect(service.selectedRouteTravelTime()).toBe('2m 00s');
 
         service.selectArea(areas[0]);
         expect(service.selectedPaths().map((area) => area.id)).toEqual([2, 3, 1]);

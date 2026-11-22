@@ -15,6 +15,8 @@ export class WorldMapDataService {
     private readonly destroyRef = inject(DestroyRef);
     private loadStarted = false;
     private pathsRequestId = 0;
+    private readonly travelTimeEstimates = new Map<number, number | null>();
+    private selectedPathDurations: (number | null | undefined)[] = [];
 
     public readonly areas = signal<AreaDto[]>([]);
     public readonly character = signal<GetCharacterDetailsQueryResult | null>(null);
@@ -109,15 +111,22 @@ export class WorldMapDataService {
         }
 
         const selectedArea = this.areas().find(({ id }) => id === area.id) ?? area;
+        const pathDuration = this.travelTimeEstimates.get(path.id);
         this.selectedPaths.update((selectedAreas) => [
             ...selectedAreas,
             AreaDto.fromJS(selectedArea),
         ]);
         this.selectedPathIds.update((pathIds) => [...pathIds, path.id]);
+        this.selectedPathDurations = [...this.selectedPathDurations, pathDuration];
         this.selectedPathTravelTimes.update((times) => [
             ...times,
-            this.travelTimeFor(area.id),
+            pathDuration === undefined
+                ? undefined
+                : pathDuration === null
+                  ? null
+                  : this.formatTravelTime(pathDuration),
         ]);
+        this.updateSelectedRouteTravelTime();
         this.travelStarted.set(false);
         this.loadAvailablePaths(area.id);
     }
@@ -138,7 +147,9 @@ export class WorldMapDataService {
 
         this.selectedPaths.set(selectedAreas.slice(0, index));
         this.selectedPathIds.update((pathIds) => pathIds.slice(0, index));
+        this.selectedPathDurations = this.selectedPathDurations.slice(0, index);
         this.selectedPathTravelTimes.update((times) => times.slice(0, index));
+        this.updateSelectedRouteTravelTime();
         this.travelStarted.set(false);
         const remainingArea = this.selectedPaths().at(-1) ?? this.currentArea();
         if (remainingArea) {
@@ -154,7 +165,6 @@ export class WorldMapDataService {
         this.estimatesRequestId++;
         this.availablePaths.set([]);
         this.travelTimes.set({});
-        this.selectedRouteTravelTime.set(undefined);
         this.apiClient
             .getAreaAvailablePaths(areaId)
             .pipe(takeUntilDestroyed(this.destroyRef))
@@ -216,140 +226,37 @@ export class WorldMapDataService {
         }
 
         const requestId = ++this.estimatesRequestId;
-        const selectedPathIds = this.selectedPathIds();
         const estimatedTimes = new Map<number, number | null>();
-        const selectedRoutePrefixTimes = new Map<number, number | null>([[0, 0]]);
-        let selectedRouteTime: number | null | undefined =
-            selectedPathIds.length === 0 ? 0 : undefined;
 
-        const updateSelectedPathTravelTimes = (): void => {
+        const updateTravelTimes = (): void => {
             if (requestId !== this.estimatesRequestId) {
                 return;
             }
 
-            const times = selectedPathIds.map((_, index) => {
-                const previousTime = selectedRoutePrefixTimes.get(index);
-                const currentTime = selectedRoutePrefixTimes.get(index + 1);
-                if (previousTime === undefined || currentTime === undefined) {
-                    return undefined;
-                }
-                if (previousTime === null || currentTime === null) {
-                    return null;
-                }
-
-                const increment = currentTime - previousTime;
-                if (increment < 0) {
-                    console.error(
-                        `Estimated travel time for selected path ${index} is negative.`,
-                    );
-                    return null;
-                }
-                return this.formatTravelTime(increment);
-            });
-            this.selectedPathTravelTimes.set(times);
-        };
-
-        const updateTravelTimes = (): void => {
-            if (requestId !== this.estimatesRequestId || selectedRouteTime === undefined) {
-                return;
-            }
-
-            const selectedRouteTimeSnapshot = selectedRouteTime;
             this.travelTimes.update((times) => {
                 const updatedTimes = { ...times };
-                for (const [areaId, totalTime] of estimatedTimes) {
-                    if (totalTime === null || selectedRouteTimeSnapshot === null) {
+                for (const [areaId, travelTime] of estimatedTimes) {
+                    if (travelTime === null) {
                         updatedTimes[areaId] = null;
                     } else {
-                        const travelTime = totalTime - selectedRouteTimeSnapshot;
-                        if (travelTime < 0) {
-                            console.error(
-                                `Estimated travel time to area ${areaId} is shorter than the selected route.`,
-                            );
-                            updatedTimes[areaId] = null;
-                        } else {
-                            updatedTimes[areaId] = this.formatTravelTime(travelTime);
-                        }
+                        updatedTimes[areaId] = this.formatTravelTime(travelTime);
                     }
                 }
                 return updatedTimes;
             });
         };
 
-        if (selectedPathIds.length > 0) {
-            this.apiClient
-                .estimateTravel(characterId, selectedPathIds)
-                .pipe(takeUntilDestroyed(this.destroyRef))
-                .subscribe({
-                    next: ({ totalTravelTime }) => {
-                        if (requestId === this.estimatesRequestId) {
-                            selectedRouteTime = this.parseTravelTime(totalTravelTime);
-                            this.selectedRouteTravelTime.set(
-                                selectedRouteTime === null
-                                    ? null
-                                    : this.formatTravelTime(selectedRouteTime),
-                            );
-                            selectedRoutePrefixTimes.set(selectedPathIds.length, selectedRouteTime);
-                            updateSelectedPathTravelTimes();
-                            updateTravelTimes();
-                        }
-                    },
-                    error: (error: unknown) => {
-                        console.error('Failed to estimate the selected route travel time.', error);
-                        if (requestId === this.estimatesRequestId) {
-                            selectedRouteTime = null;
-                            this.selectedRouteTravelTime.set(null);
-                            selectedRoutePrefixTimes.set(selectedPathIds.length, null);
-                            updateSelectedPathTravelTimes();
-                            for (const path of paths) {
-                                estimatedTimes.set(path.targetArea.id, null);
-                            }
-                            updateTravelTimes();
-                        }
-                    },
-                });
-        }
-
-        for (let prefixLength = 1; prefixLength < selectedPathIds.length; prefixLength++) {
-            const prefixPathIds = selectedPathIds.slice(0, prefixLength);
-            this.apiClient
-                .estimateTravel(characterId, prefixPathIds)
-                .pipe(takeUntilDestroyed(this.destroyRef))
-                .subscribe({
-                    next: ({ totalTravelTime }) => {
-                        if (requestId === this.estimatesRequestId) {
-                            selectedRoutePrefixTimes.set(
-                                prefixLength,
-                                this.parseTravelTime(totalTravelTime),
-                            );
-                            updateSelectedPathTravelTimes();
-                        }
-                    },
-                    error: (error: unknown) => {
-                        console.error(
-                            `Failed to estimate the selected route after ${prefixLength} paths.`,
-                            error,
-                        );
-                        if (requestId === this.estimatesRequestId) {
-                            selectedRoutePrefixTimes.set(prefixLength, null);
-                            updateSelectedPathTravelTimes();
-                        }
-                    },
-                });
-        }
-
         for (const path of paths) {
-            const routePathIds = [...selectedPathIds, path.id];
             this.apiClient
-                .estimateTravel(characterId, routePathIds)
+                .estimateTravel(characterId, [path.id])
                 .pipe(takeUntilDestroyed(this.destroyRef))
                 .subscribe({
                     next: ({ totalTravelTime }) => {
+                        const duration = this.parseTravelTime(totalTravelTime);
+                        this.travelTimeEstimates.set(path.id, duration);
+                        this.updateSelectedPathDuration(path.id, duration);
                         if (requestId === this.estimatesRequestId) {
-                            estimatedTimes.set(
-                                path.targetArea.id,
-                                this.parseTravelTime(totalTravelTime),
-                            );
+                            estimatedTimes.set(path.targetArea.id, duration);
                             updateTravelTimes();
                         }
                     },
@@ -358,6 +265,8 @@ export class WorldMapDataService {
                             `Failed to estimate travel time to area ${path.targetArea.id}.`,
                             error,
                         );
+                        this.travelTimeEstimates.set(path.id, null);
+                        this.updateSelectedPathDuration(path.id, null);
                         if (requestId === this.estimatesRequestId) {
                             estimatedTimes.set(path.targetArea.id, null);
                             updateTravelTimes();
@@ -365,6 +274,46 @@ export class WorldMapDataService {
                     },
                 });
         }
+    }
+
+    private updateSelectedPathDuration(pathId: number, duration: number | null): void {
+        const index = this.selectedPathIds().indexOf(pathId);
+        if (index < 0) {
+            return;
+        }
+
+        this.selectedPathDurations[index] = duration;
+        this.selectedPathTravelTimes.update((times) =>
+            times.map((time, pathIndex) =>
+                pathIndex !== index
+                    ? time
+                    : duration === null
+                      ? null
+                      : this.formatTravelTime(duration),
+            ),
+        );
+        this.updateSelectedRouteTravelTime();
+    }
+
+    private updateSelectedRouteTravelTime(): void {
+        if (
+            this.selectedPathDurations.length === 0 ||
+            this.selectedPathDurations.some((duration) => duration === undefined)
+        ) {
+            this.selectedRouteTravelTime.set(undefined);
+            return;
+        }
+
+        if (this.selectedPathDurations.some((duration) => duration === null)) {
+            this.selectedRouteTravelTime.set(null);
+            return;
+        }
+
+        const totalTime = this.selectedPathDurations.reduce<number>(
+            (total, duration) => total + (duration ?? 0),
+            0,
+        );
+        this.selectedRouteTravelTime.set(this.formatTravelTime(totalTime));
     }
 
     private parseTravelTime(value: string): number | null {
