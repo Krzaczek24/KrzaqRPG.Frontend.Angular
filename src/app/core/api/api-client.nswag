@@ -46,7 +46,7 @@
       "markOptionalProperties": true,
       "generateCloneMethod": false,
       "typeStyle": "Class",
-      "enumStyle": "Enum",
+      "enumStyle": "StringLiteral",
       "useLeafType": false,
       "classTypes": [],
       "extendedClasses": [],
