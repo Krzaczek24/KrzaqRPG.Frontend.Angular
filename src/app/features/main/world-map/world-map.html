@@ -1,12 +1,39 @@
 <section class="world-map-page">
     <header class="world-map-page__header">
+        <div
+            class="world-map__coordinates"
+            [attr.aria-label]="i18n.text.mapCursorCoordinates"
+            role="group"
+        >
+            <span aria-hidden="true">X:</span>
+            <output>{{ cursorCoordinates()?.x ?? '--' }}</output>
+            <span aria-hidden="true">Y:</span>
+            <output>{{ cursorCoordinates()?.y ?? '--' }}</output>
+            <button
+                class="world-map__button world-map__coordinates-copy"
+                type="button"
+                [attr.aria-label]="i18n.text.copyRecentMapCoordinates"
+                [attr.data-tooltip]="i18n.text.copyRecentMapCoordinates"
+                [disabled]="recentClickedCoordinates().length === 0"
+                (click)="copyRecentCoordinates()"
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                        d="M8 8V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-3M5 8h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z"
+                    />
+                </svg>
+                <span class="world-map__coordinates-copy-count" aria-hidden="true">
+                    {{ recentClickedCoordinates().length }}
+                </span>
+            </button>
+        </div>
         <h1 class="world-map-page__heading">{{ i18n.text.worldMap }}</h1>
         <div class="world-map__controls" [attr.aria-label]="i18n.text.mapControls">
             <button
                 class="world-map__button"
                 type="button"
                 [attr.aria-label]="i18n.text.zoomOut"
-                [title]="i18n.text.zoomOut"
+                [attr.data-tooltip]="i18n.text.zoomOut"
                 [disabled]="zoom <= minZoom"
                 (click)="zoomOut()"
             >
@@ -18,7 +45,7 @@
                 class="world-map__button"
                 type="button"
                 [attr.aria-label]="i18n.text.zoomIn"
-                [title]="i18n.text.zoomIn"
+                [attr.data-tooltip]="i18n.text.zoomIn"
                 [disabled]="zoom >= 3"
                 (click)="zoomIn()"
             >
@@ -30,7 +57,7 @@
                 class="world-map__button world-map__button--reset"
                 type="button"
                 [attr.aria-label]="i18n.text.resetMapView"
-                [title]="i18n.text.resetMapView"
+                [attr.data-tooltip]="i18n.text.resetMapView"
                 [disabled]="zoom === 1"
                 (click)="resetView()"
             >
@@ -49,8 +76,10 @@
                 [attr.aria-label]="i18n.text.worldMap"
                 role="region"
                 (wheel)="onWheel($event)"
+                (click)="onMapClick($event)"
                 (pointerdown)="startDragging($event)"
-                (pointermove)="drag($event)"
+                (pointermove)="onPointerMove($event)"
+                (pointerleave)="clearCursorCoordinates()"
                 (pointerup)="stopDragging()"
                 (pointercancel)="stopDragging()"
                 (lostpointercapture)="stopDragging()"
@@ -62,7 +91,101 @@
                         [alt]="i18n.text.worldMap"
                         draggable="false"
                     />
-                    <div class="world-map__overlay" aria-hidden="true"></div>
+                    <div class="world-map__overlay">
+                        @if (routePath; as path) {
+                            <svg
+                                class="world-map__route"
+                                viewBox="0 0 100 100"
+                                preserveAspectRatio="none"
+                                aria-hidden="true"
+                            >
+                                <defs>
+                                    @for (segment of path.segments; track segment.id) {
+                                        <linearGradient
+                                            [attr.id]="'world-map-route-gradient-' + segment.id"
+                                            gradientUnits="userSpaceOnUse"
+                                            [attr.x1]="segment.start.x"
+                                            [attr.y1]="segment.start.y"
+                                            [attr.x2]="segment.end.x"
+                                            [attr.y2]="segment.end.y"
+                                        >
+                                            <stop
+                                                offset="0%"
+                                                [attr.stop-color]="segment.startColor"
+                                            />
+                                            <stop
+                                                offset="100%"
+                                                [attr.stop-color]="segment.endColor"
+                                            />
+                                        </linearGradient>
+                                    }
+                                </defs>
+                                <path class="world-map__route-outline" [attr.d]="path.d" />
+                                @for (segment of path.segments; track segment.id) {
+                                    <path
+                                        class="world-map__route-line"
+                                        [attr.d]="segment.d"
+                                        [style.stroke]="
+                                            'url(#world-map-route-gradient-' + segment.id + ')'
+                                        "
+                                    />
+                                }
+                            </svg>
+                        }
+                        @if (playerPosition; as player) {
+                            <div
+                                class="world-map__player"
+                                [style.left.%]="player.x"
+                                [style.top.%]="player.y"
+                                [attr.aria-label]="player.name"
+                                [title]="player.name"
+                                role="img"
+                            >
+                                <span class="world-map__player-marker" aria-hidden="true"></span>
+                            </div>
+                        }
+                        @if (destinationPosition; as destination) {
+                            <div
+                                class="world-map__player world-map__player--destination"
+                                [style.left.%]="destination.x"
+                                [style.top.%]="destination.y"
+                                [attr.aria-label]="destination.name"
+                                [title]="destination.name"
+                                role="img"
+                            >
+                                <span class="world-map__player-marker" aria-hidden="true"></span>
+                            </div>
+                        }
+                        @for (position of positionedAreas; track position.area.id) {
+                            <button
+                                class="world-map__area"
+                                [class.world-map__area--extra-large]="
+                                    getAreaMarkerClass(position.area) ===
+                                    'world-map__area--extra-large'
+                                "
+                                [class.world-map__area--large]="
+                                    getAreaMarkerClass(position.area) === 'world-map__area--large'
+                                "
+                                [class.world-map__area--medium]="
+                                    getAreaMarkerClass(position.area) === 'world-map__area--medium'
+                                "
+                                [class.world-map__area--small]="
+                                    getAreaMarkerClass(position.area) === 'world-map__area--small'
+                                "
+                                [class.world-map__area--tooltip-below]="position.y <= 22"
+                                [class.world-map__area--available]="
+                                    worldMapData.isAreaReachable(position.area.id)
+                                "
+                                type="button"
+                                [style.left.%]="position.x"
+                                [style.top.%]="position.y"
+                                [attr.aria-label]="position.area.name"
+                                [attr.data-tooltip]="position.area.name"
+                                (pointerdown)="$event.stopPropagation()"
+                                (click)="onAreaClick(position.area)"
+                            ></button>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
