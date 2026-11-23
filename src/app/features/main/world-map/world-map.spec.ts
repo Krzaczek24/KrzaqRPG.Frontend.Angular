@@ -1,6 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { computed, signal } from '@angular/core';
-import { AreaDto, AvailablePathDto, GetCharacterDetailsQueryResult } from '../../../core/api/api-client';
+import {
+    AreaDto,
+    AvailablePathDto,
+    GetCharacterDetailsQueryResult,
+} from '../../../core/api/api-client';
 import { WorldMap } from './world-map';
 import { WorldMapDataService } from './world-map-data.service';
 
@@ -14,9 +18,9 @@ describe('WorldMap', () => {
     ];
     const character = signal(
         GetCharacterDetailsQueryResult.fromJS({
-                id: 1,
-                name: 'Krzaq',
-                location: { type: 'Area', id: 1, name: 'Abandoned Mines' },
+            id: 1,
+            name: 'Krzaq',
+            location: { type: 'Area', id: 1, name: 'Abandoned Mines' },
         }),
     );
     const currentArea = computed(
@@ -41,8 +45,7 @@ describe('WorldMap', () => {
                   : undefined;
         const currentAreaId = selectedAreas.at(-1)?.id ?? currentArea()?.id;
         return availablePaths().filter(
-            (path) =>
-                path.targetArea.id !== currentAreaId && path.targetArea.id !== previousAreaId,
+            (path) => path.targetArea.id !== currentAreaId && path.targetArea.id !== previousAreaId,
         );
     });
 
@@ -150,7 +153,7 @@ describe('WorldMap', () => {
 
         selectedPaths.set([
             areas[2],
-            AreaDto.fromJS({ id: 4, name: 'Final place', coordinates: { x: 700, y: 900 } }),
+            AreaDto.fromJS({ id: 999, name: 'Final place', coordinates: { x: 700, y: 900 } }),
         ]);
         fixture.detectChanges();
 
@@ -166,7 +169,7 @@ describe('WorldMap', () => {
     it('draws the selected route from the current area', () => {
         selectedPaths.set([
             areas[2],
-            AreaDto.fromJS({ id: 4, name: 'Final place', coordinates: { x: 700, y: 900 } }),
+            AreaDto.fromJS({ id: 999, name: 'Final place', coordinates: { x: 700, y: 900 } }),
         ]);
         fixture.detectChanges();
 
@@ -186,6 +189,18 @@ describe('WorldMap', () => {
             lastStops[0].getAttribute('stop-color'),
         );
         expect(lastStops[1].getAttribute('stop-color')).toBe('#dfb783');
+    });
+
+    it('uses configured map waypoints between connected areas', () => {
+        selectedPaths.set([
+            AreaDto.fromJS({
+                id: 30,
+                name: 'Ignaroth',
+                coordinates: { x: 125, y: 370 },
+            }),
+        ]);
+
+        expect(component.routePath?.d).toContain('Q 9.5,6.5');
     });
 
     it('highlights areas that are available through a travel path', () => {
@@ -213,14 +228,19 @@ describe('WorldMap', () => {
     });
 
     it('sizes marker hit areas according to their area type', () => {
-        expect(component.getAreaMarkerClass(AreaDto.fromJS({ id: 3, name: 'Capital', type: 'CITY' })))
-            .toBe('world-map__area--extra-large');
-        expect(component.getAreaMarkerClass(AreaDto.fromJS({ id: 4, name: 'Town', type: 'TOWN' })))
-            .toBe('world-map__area--large');
-        expect(component.getAreaMarkerClass(AreaDto.fromJS({ id: 5, name: 'Tavern', type: 'TAVERN' })))
-            .toBe('world-map__area--large');
         expect(
-            component.getAreaMarkerClass(AreaDto.fromJS({ id: 6, name: 'Village', type: 'VILLAGE' })),
+            component.getAreaMarkerClass(AreaDto.fromJS({ id: 3, name: 'Capital', type: 'CITY' })),
+        ).toBe('world-map__area--extra-large');
+        expect(
+            component.getAreaMarkerClass(AreaDto.fromJS({ id: 4, name: 'Town', type: 'TOWN' })),
+        ).toBe('world-map__area--large');
+        expect(
+            component.getAreaMarkerClass(AreaDto.fromJS({ id: 5, name: 'Tavern', type: 'TAVERN' })),
+        ).toBe('world-map__area--large');
+        expect(
+            component.getAreaMarkerClass(
+                AreaDto.fromJS({ id: 6, name: 'Village', type: 'VILLAGE' }),
+            ),
         ).toBe('world-map__area--large');
         expect(
             component.getAreaMarkerClass(
@@ -233,8 +253,9 @@ describe('WorldMap', () => {
         expect(
             component.getAreaMarkerClass(AreaDto.fromJS({ id: 9, name: 'Mines', type: 'MINES' })),
         ).toBe('world-map__area--medium');
-        expect(component.getAreaMarkerClass(AreaDto.fromJS({ id: 10, name: 'Cave', type: 'CAVE' })))
-            .toBe('world-map__area--small');
+        expect(
+            component.getAreaMarkerClass(AreaDto.fromJS({ id: 10, name: 'Cave', type: 'CAVE' })),
+        ).toBe('world-map__area--small');
     });
 
     it('passes a clicked area to the action handler', () => {

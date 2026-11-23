@@ -2,6 +2,7 @@ import { Component, HostListener, inject } from '@angular/core';
 import { AreaDto } from '../../../core/api/api-client';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { WorldMapDataService } from './world-map-data.service';
+import { getWorldMapRouteWaypoints } from './world-map-routes';
 
 const MIN_ZOOM = 0.75;
 const INITIAL_ZOOM = 1;
@@ -76,10 +77,24 @@ export class WorldMap {
             endColor: string;
         }[];
     } | null {
-        const route = [this.worldMapData.currentArea(), ...this.worldMapData.selectedPaths()]
-            .flatMap((area) => {
+        const areas = [this.worldMapData.currentArea(), ...this.worldMapData.selectedPaths()];
+        const route = areas
+            .flatMap((area, index) => {
                 const position = area ? this.getAreaPosition(area) : null;
-                return position ? [position] : [];
+                if (!position || !area) {
+                    return [];
+                }
+
+                const previousArea = areas[index - 1];
+                const waypoints =
+                    previousArea && this.getAreaPosition(previousArea)
+                        ? getWorldMapRouteWaypoints(previousArea.id, area.id).map((point) => ({
+                              x: (point.x * 100) / MAX_MAP_COORDINATE,
+                              y: (point.y * 100) / MAX_MAP_COORDINATE,
+                          }))
+                        : [];
+
+                return [...waypoints, position];
             })
             .filter(
                 (point, index, points) =>
