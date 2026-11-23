@@ -15,6 +15,8 @@ export interface Translations {
     registerTab: string;
     worldMap: string;
     mapControls: string;
+    mapCursorCoordinates: string;
+    copyRecentMapCoordinates: string;
     travelPanel: string;
     currentArea: string;
     currentAreaUnavailable: string;

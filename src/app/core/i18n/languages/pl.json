@@ -9,6 +9,8 @@
     "registerTab": "Rejestracja",
     "worldMap": "Mapa świata",
     "mapControls": "Sterowanie mapą",
+    "mapCursorCoordinates": "Współrzędne kursora na mapie",
+    "copyRecentMapCoordinates": "Skopiuj ostatnie kliknięcia jako punkty trasy",
     "travelPanel": "Informacje o podróży",
     "currentArea": "Obecny obszar",
     "currentAreaUnavailable": "Nieznany obszar",

@@ -9,6 +9,8 @@
     "registerTab": "Реєстрація",
     "worldMap": "Мапа світу",
     "mapControls": "Керування мапою",
+    "mapCursorCoordinates": "Координати курсора на мапі",
+    "copyRecentMapCoordinates": "Скопіювати останні кліки як точки маршруту",
     "travelPanel": "Інформація про подорож",
     "currentArea": "Поточна місцевість",
     "currentAreaUnavailable": "Місцевість недоступна",

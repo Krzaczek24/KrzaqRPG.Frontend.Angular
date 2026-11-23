@@ -1,4 +1,4 @@
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, HostListener, inject, signal } from '@angular/core';
 import { AreaDto } from '../../../core/api/api-client';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { WorldMapDataService } from './world-map-data.service';
@@ -26,6 +26,8 @@ export class WorldMap {
     public offsetX = 0;
     public offsetY = 0;
     public isDragging = false;
+    public readonly cursorCoordinates = signal<{ x: number; y: number } | null>(null);
+    public readonly recentClickedCoordinates = signal<{ x: number; y: number }[]>([]);
     private pointerX = 0;
     private pointerY = 0;
     private viewportWidth = 0;
@@ -339,6 +341,82 @@ export class WorldMap {
         this.pointerX = event.clientX;
         this.pointerY = event.clientY;
         this.clampOffsets();
+    }
+
+    public onPointerMove(event: PointerEvent): void {
+        if (this.isDragging) {
+            this.drag(event);
+        }
+
+        this.updateCursorCoordinates(event);
+    }
+
+    public onMapClick(event: MouseEvent): void {
+        this.updateCursorCoordinates(event);
+        const coordinates = this.cursorCoordinates();
+        if (coordinates) {
+            this.recentClickedCoordinates.update((recent) => [...recent, coordinates].slice(-10));
+            console.log('Map coordinates:', coordinates);
+        }
+    }
+
+    public async copyRecentCoordinates(): Promise<void> {
+        const coordinates = this.recentClickedCoordinates();
+        if (coordinates.length === 0) {
+            return;
+        }
+
+        const clipboardText = coordinates.map(({ x, y }) => `{ x: ${x}, y: ${y} },`).join('\n        ');
+
+        try {
+            await navigator.clipboard.writeText(clipboardText);
+            this.recentClickedCoordinates.set([]);
+        } catch (error) {
+            console.error('Failed to copy map route coordinates to clipboard.', error);
+        }
+    }
+
+    private updateCursorCoordinates(event: MouseEvent): void {
+        const viewport = event.currentTarget as HTMLElement;
+        this.updateViewport(viewport);
+        const viewportBounds = viewport.getBoundingClientRect();
+        const { width, height } = this.getMapSize();
+        const renderedWidth = width * this.zoom;
+        const renderedHeight = height * this.zoom;
+
+        if (
+            viewportBounds.width <= 0 ||
+            viewportBounds.height <= 0 ||
+            renderedWidth <= 0 ||
+            renderedHeight <= 0 ||
+            event.clientX < viewportBounds.left ||
+            event.clientX > viewportBounds.right ||
+            event.clientY < viewportBounds.top ||
+            event.clientY > viewportBounds.bottom
+        ) {
+            this.cursorCoordinates.set(null);
+            return;
+        }
+
+        const mapLeft =
+            viewportBounds.left + viewportBounds.width / 2 + this.offsetX - renderedWidth / 2;
+        const mapTop =
+            viewportBounds.top + viewportBounds.height / 2 + this.offsetY - renderedHeight / 2;
+        const x = ((event.clientX - mapLeft) * MAX_MAP_COORDINATE) / renderedWidth;
+        const y = ((event.clientY - mapTop) * MAX_MAP_COORDINATE) / renderedHeight;
+
+        this.cursorCoordinates.set(
+            x < 0 || x > MAX_MAP_COORDINATE || y < 0 || y > MAX_MAP_COORDINATE
+                ? null
+                : {
+                      x: Math.round(x),
+                      y: Math.round(y),
+                  },
+        );
+    }
+
+    public clearCursorCoordinates(): void {
+        this.cursorCoordinates.set(null);
     }
 
     public stopDragging(): void {

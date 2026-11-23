@@ -1,5 +1,32 @@
 <section class="world-map-page">
     <header class="world-map-page__header">
+        <div
+            class="world-map__coordinates"
+            [attr.aria-label]="i18n.text.mapCursorCoordinates"
+            role="group"
+        >
+            <span aria-hidden="true">X:</span>
+            <output>{{ cursorCoordinates()?.x ?? '--' }}</output>
+            <span aria-hidden="true">Y:</span>
+            <output>{{ cursorCoordinates()?.y ?? '--' }}</output>
+            <button
+                class="world-map__button world-map__coordinates-copy"
+                type="button"
+                [attr.aria-label]="i18n.text.copyRecentMapCoordinates"
+                [attr.data-tooltip]="i18n.text.copyRecentMapCoordinates"
+                [disabled]="recentClickedCoordinates().length === 0"
+                (click)="copyRecentCoordinates()"
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                        d="M8 8V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-3M5 8h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z"
+                    />
+                </svg>
+                <span class="world-map__coordinates-copy-count" aria-hidden="true">
+                    {{ recentClickedCoordinates().length }}
+                </span>
+            </button>
+        </div>
         <h1 class="world-map-page__heading">{{ i18n.text.worldMap }}</h1>
         <div class="world-map__controls" [attr.aria-label]="i18n.text.mapControls">
             <button
@@ -49,8 +76,10 @@
                 [attr.aria-label]="i18n.text.worldMap"
                 role="region"
                 (wheel)="onWheel($event)"
+                (click)="onMapClick($event)"
                 (pointerdown)="startDragging($event)"
-                (pointermove)="drag($event)"
+                (pointermove)="onPointerMove($event)"
+                (pointerleave)="clearCursorCoordinates()"
                 (pointerup)="stopDragging()"
                 (pointercancel)="stopDragging()"
                 (lostpointercapture)="stopDragging()"

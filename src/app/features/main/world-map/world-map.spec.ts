@@ -91,11 +91,129 @@ describe('WorldMap', () => {
     });
 
     it('shows zoom and reset buttons without a percentage indicator', () => {
-        expect(fixture.nativeElement.querySelectorAll('.world-map__button')).toHaveLength(3);
+        expect(fixture.nativeElement.querySelectorAll('.world-map__button')).toHaveLength(4);
         expect(fixture.nativeElement.querySelector('.world-map__zoom')).toBeNull();
-        const zoomOut = fixture.nativeElement.querySelector('.world-map__button');
+        const zoomOut = fixture.nativeElement.querySelector(
+            '.world-map__controls .world-map__button',
+        );
         expect(zoomOut.getAttribute('data-tooltip')).toBe(component.i18n.text.zoomOut);
         expect(zoomOut.hasAttribute('title')).toBe(false);
+    });
+
+    it('shows map coordinates under the cursor after zoom and pan', () => {
+        const viewport = fixture.nativeElement.querySelector('.world-map__viewport');
+        Object.defineProperty(viewport, 'getBoundingClientRect', {
+            value: () => ({
+                left: 100,
+                top: 50,
+                right: 500,
+                bottom: 350,
+                width: 400,
+                height: 300,
+            }),
+        });
+        component.zoom = 2;
+        component.offsetX = 20;
+        component.offsetY = -10;
+
+        component.onPointerMove({
+            clientX: 120,
+            clientY: 70,
+            currentTarget: viewport,
+        } as PointerEvent);
+        fixture.detectChanges();
+
+        expect(component.cursorCoordinates()).toEqual({ x: 500, y: 600 });
+        expect(
+            fixture.nativeElement.querySelector('.world-map__coordinates').textContent,
+        ).toContain('500');
+        expect(
+            fixture.nativeElement.querySelector('.world-map__coordinates').textContent,
+        ).toContain('600');
+
+        const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+        viewport.dispatchEvent(
+            new MouseEvent('click', {
+                bubbles: true,
+                clientX: 120,
+                clientY: 70,
+            }),
+        );
+
+        expect(logSpy).toHaveBeenCalledWith('Map coordinates:', { x: 500, y: 600 });
+        logSpy.mockRestore();
+
+        component.clearCursorCoordinates();
+
+        expect(component.cursorCoordinates()).toBeNull();
+    });
+
+    it('copies the last ten clicked map coordinates and clears them after success', async () => {
+        const viewport = fixture.nativeElement.querySelector('.world-map__viewport');
+        Object.defineProperty(viewport, 'getBoundingClientRect', {
+            value: () => ({
+                left: 100,
+                top: 50,
+                right: 500,
+                bottom: 350,
+                width: 400,
+                height: 300,
+            }),
+        });
+        component.zoom = 2;
+        component.offsetX = 20;
+        component.offsetY = -10;
+
+        const originalClipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
+        const writeText = vi.fn().mockResolvedValue(undefined);
+        const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+        Object.defineProperty(navigator, 'clipboard', {
+            configurable: true,
+            value: { writeText },
+        });
+
+        try {
+            for (let clientX = 120; clientX < 132; clientX++) {
+                viewport.dispatchEvent(
+                    new MouseEvent('click', {
+                        bubbles: true,
+                        clientX,
+                        clientY: 70,
+                    }),
+                );
+            }
+
+            expect(component.recentClickedCoordinates()).toHaveLength(10);
+            expect(component.recentClickedCoordinates()[0]).toEqual({ x: 505, y: 600 });
+            expect(component.recentClickedCoordinates().at(-1)).toEqual({ x: 528, y: 600 });
+
+            await component.copyRecentCoordinates();
+
+            expect(writeText).toHaveBeenCalledWith(
+                [
+                    '[',
+                    '    { x: 505, y: 600 },',
+                    '    { x: 508, y: 600 },',
+                    '    { x: 510, y: 600 },',
+                    '    { x: 513, y: 600 },',
+                    '    { x: 515, y: 600 },',
+                    '    { x: 518, y: 600 },',
+                    '    { x: 520, y: 600 },',
+                    '    { x: 523, y: 600 },',
+                    '    { x: 525, y: 600 },',
+                    '    { x: 528, y: 600 },',
+                    ']',
+                ].join('\n'),
+            );
+            expect(component.recentClickedCoordinates()).toEqual([]);
+        } finally {
+            logSpy.mockRestore();
+            if (originalClipboard) {
+                Object.defineProperty(navigator, 'clipboard', originalClipboard);
+            } else {
+                Reflect.deleteProperty(navigator, 'clipboard');
+            }
+        }
     });
 
     it('renders only valid API locations at their map coordinates', () => {

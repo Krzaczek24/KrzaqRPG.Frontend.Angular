@@ -276,18 +276,57 @@
     outline-offset: 3px;
 }
 
-.world-map__controls {
+.world-map__controls,
+.world-map__coordinates {
     position: relative;
     z-index: 10000;
     display: flex;
     align-items: center;
-    justify-self: end;
-    grid-column: 3;
     gap: 6px;
     padding: 6px;
     border: 1px solid var(--color-border);
     border-radius: 10px;
     background: var(--color-surface);
+}
+
+.world-map__controls {
+    justify-self: end;
+    grid-column: 3;
+}
+
+.world-map__coordinates {
+    justify-self: start;
+    grid-column: 1;
+    min-height: 48px;
+    padding: 6px 10px;
+    color: var(--color-text);
+    font-size: 0.857143rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.world-map__coordinates output {
+    min-width: 2.5em;
+    color: var(--color-text);
+}
+
+.world-map__button.world-map__coordinates-copy {
+    display: flex;
+    width: auto;
+    min-width: 36px;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 6px;
+}
+
+.world-map__coordinates-copy svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+}
+
+.world-map__coordinates-copy-count {
+    font-size: 0.75rem;
 }
 
 .world-map__button {
@@ -342,11 +381,13 @@
     }
 
     .world-map-page__heading,
-    .world-map__controls {
+    .world-map__controls,
+    .world-map__coordinates {
         grid-column: 1;
     }
 
-    .world-map__controls {
+    .world-map__controls,
+    .world-map__coordinates {
         justify-self: center;
     }
 }
