@@ -115,6 +115,18 @@
                                 <span class="world-map__player-marker" aria-hidden="true"></span>
                             </div>
                         }
+                        @if (destinationPosition; as destination) {
+                            <div
+                                class="world-map__player world-map__player--destination"
+                                [style.left.%]="destination.x"
+                                [style.top.%]="destination.y"
+                                [attr.aria-label]="destination.name"
+                                [title]="destination.name"
+                                role="img"
+                            >
+                                <span class="world-map__player-marker" aria-hidden="true"></span>
+                            </div>
+                        }
                         @for (position of positionedAreas; track position.area.id) {
                             <button
                                 class="world-map__area"

@@ -141,6 +141,18 @@
     box-shadow: 0 0 8px 2px #39d98a;
 }
 
+.world-map__player--destination {
+    background: color-mix(in srgb, #f04444 35%, transparent);
+    box-shadow:
+        0 0 10px 4px color-mix(in srgb, #f04444 80%, transparent),
+        0 0 26px 10px color-mix(in srgb, #f04444 45%, transparent);
+}
+
+.world-map__player--destination .world-map__player-marker {
+    background: #f04444;
+    box-shadow: 0 0 8px 2px #f04444;
+}
+
 .world-map__area {
     position: absolute;
     top: 0;
@@ -177,8 +189,8 @@
 }
 
 .world-map__area--extra-large {
-    width: 160px;
-    height: 160px;
+    width: 128px;
+    height: 128px;
 }
 
 .world-map__area::after,

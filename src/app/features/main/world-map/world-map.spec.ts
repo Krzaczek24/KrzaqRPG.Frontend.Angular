@@ -122,23 +122,56 @@ describe('WorldMap', () => {
 
         expect(component.worldMapData.character()?.id).toBe(1);
         expect(marker).toBeTruthy();
+        expect(marker.classList.contains('world-map__player--destination')).toBe(false);
+        expect(fixture.nativeElement.querySelector('.world-map__player--destination')).toBeNull();
         expect(marker.getAttribute('aria-label')).toBe('Krzaq');
         expect(marker.style.left).toBe('14%');
         expect(marker.style.top).toBe('7%');
     });
 
-    it('moves the player marker and draws the selected route from the current area', () => {
+    it('keeps the start marker fixed and moves the red marker with each selected area', () => {
+        const playerMarker = fixture.nativeElement.querySelector(
+            '.world-map__player:not(.world-map__player--destination)',
+        );
+
+        expect(fixture.nativeElement.querySelector('.world-map__player--destination')).toBeNull();
+
+        selectedPaths.set([areas[2]]);
+        fixture.detectChanges();
+
+        let destinationMarker = fixture.nativeElement.querySelector(
+            '.world-map__player--destination',
+        );
+
+        expect(playerMarker.style.left).toBe('14%');
+        expect(playerMarker.style.top).toBe('7%');
+        expect(destinationMarker.style.left).toBe('25%');
+        expect(destinationMarker.style.top).toBe('30%');
+
         selectedPaths.set([
             areas[2],
             AreaDto.fromJS({ id: 4, name: 'Final place', coordinates: { x: 700, y: 900 } }),
         ]);
         fixture.detectChanges();
 
-        const marker = fixture.nativeElement.querySelector('.world-map__player');
+        destinationMarker = fixture.nativeElement.querySelector('.world-map__player--destination');
+
+        expect(playerMarker.style.left).toBe('14%');
+        expect(playerMarker.style.top).toBe('7%');
+        expect(destinationMarker.style.left).toBe('35%');
+        expect(destinationMarker.style.top).toBe('45%');
+        expect(destinationMarker.getAttribute('aria-label')).toBe('Final place');
+    });
+
+    it('draws the selected route from the current area', () => {
+        selectedPaths.set([
+            areas[2],
+            AreaDto.fromJS({ id: 4, name: 'Final place', coordinates: { x: 700, y: 900 } }),
+        ]);
+        fixture.detectChanges();
+
         const route = fixture.nativeElement.querySelector('.world-map__route-outline');
 
-        expect(marker.style.left).toBe('35%');
-        expect(marker.style.top).toBe('45%');
         expect(route.getAttribute('d')).toMatch(/^M 14,7 L /);
         expect(route.getAttribute('d')).toContain(' Q 25,30 ');
         expect(route.getAttribute('d')).toMatch(/L 35,45$/);
@@ -148,11 +181,11 @@ describe('WorldMap', () => {
         expect(gradients).toHaveLength(2);
         const firstStops = gradients[0].querySelectorAll('stop');
         const lastStops = gradients[1].querySelectorAll('stop');
-        expect(firstStops[0].getAttribute('stop-color')).toBe('#dfb783');
+        expect(firstStops[0].getAttribute('stop-color')).toBe('#765033');
         expect(firstStops[1].getAttribute('stop-color')).toBe(
             lastStops[0].getAttribute('stop-color'),
         );
-        expect(lastStops[1].getAttribute('stop-color')).toBe('#765033');
+        expect(lastStops[1].getAttribute('stop-color')).toBe('#dfb783');
     });
 
     it('highlights areas that are available through a travel path', () => {
@@ -186,7 +219,21 @@ describe('WorldMap', () => {
             .toBe('world-map__area--large');
         expect(component.getAreaMarkerClass(AreaDto.fromJS({ id: 5, name: 'Tavern', type: 'TAVERN' })))
             .toBe('world-map__area--large');
-        expect(component.getAreaMarkerClass(AreaDto.fromJS({ id: 6, name: 'Cave', type: 'CAVE' })))
+        expect(
+            component.getAreaMarkerClass(AreaDto.fromJS({ id: 6, name: 'Village', type: 'VILLAGE' })),
+        ).toBe('world-map__area--large');
+        expect(
+            component.getAreaMarkerClass(
+                AreaDto.fromJS({ id: 7, name: 'Encampment', type: 'ENCAMPMENT' }),
+            ),
+        ).toBe('world-map__area--medium');
+        expect(
+            component.getAreaMarkerClass(AreaDto.fromJS({ id: 8, name: 'Ruins', type: 'RUINS' })),
+        ).toBe('world-map__area--medium');
+        expect(
+            component.getAreaMarkerClass(AreaDto.fromJS({ id: 9, name: 'Mines', type: 'MINES' })),
+        ).toBe('world-map__area--medium');
+        expect(component.getAreaMarkerClass(AreaDto.fromJS({ id: 10, name: 'Cave', type: 'CAVE' })))
             .toBe('world-map__area--small');
     });
 

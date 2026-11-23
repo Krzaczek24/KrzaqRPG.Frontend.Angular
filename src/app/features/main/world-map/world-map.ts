@@ -40,8 +40,7 @@ export class WorldMap {
 
     public get playerPosition(): { x: number; y: number; name: string } | null {
         const character = this.worldMapData.character();
-        const area =
-            this.worldMapData.selectedPaths().at(-1) ?? this.worldMapData.currentArea();
+        const area = this.worldMapData.currentArea();
         const position = area ? this.getAreaPosition(area) : null;
         if (!position || !character) {
             return null;
@@ -50,6 +49,19 @@ export class WorldMap {
         return {
             ...position,
             name: character.name,
+        };
+    }
+
+    public get destinationPosition(): { x: number; y: number; name: string } | null {
+        const area = this.worldMapData.selectedPaths().at(-1);
+        const position = area ? this.getAreaPosition(area) : null;
+        if (!position || !area) {
+            return null;
+        }
+
+        return {
+            ...position,
+            name: area.name,
         };
     }
 
